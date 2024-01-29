@@ -1,7 +1,7 @@
-package bg.sofia.uni.fmi.mjt.splitwise.security;
+package bg.sofia.uni.fmi.mjt.splitwise.server.security;
 
-import bg.sofia.uni.fmi.mjt.splitwise.model.User;
-import bg.sofia.uni.fmi.mjt.splitwise.service.UserService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.util.Optional;
 
@@ -17,8 +17,13 @@ public class AuthenticationManager {
 
     public boolean authenticate(String username, String pass) {
         Optional<User> user = userService.findUserByUsername(username);
-        return user.isPresent()
-                && user.get().checkPassword(PasswordHasher.hashPassword(pass));
+
+        if (user.isPresent() && user.get().checkPassword(PasswordHasher.hashPassword(pass))) {
+            currentUser = user.get();
+            return true;
+        }
+
+        return false;
     }
 
     public User getAuthenticatedUser() {
@@ -29,8 +34,13 @@ public class AuthenticationManager {
         return currentUser != null;
     }
 
-    public void logout() {
+    public boolean logout() {
+        if (currentUser == null) {
+            return false;
+        }
+
         currentUser = null;
+        return true;
     }
 
 }

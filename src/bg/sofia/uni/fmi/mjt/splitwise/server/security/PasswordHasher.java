@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.splitwise.security;
+package bg.sofia.uni.fmi.mjt.splitwise.server.security;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

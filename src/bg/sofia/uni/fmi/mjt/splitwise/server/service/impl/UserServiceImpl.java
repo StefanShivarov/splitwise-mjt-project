@@ -1,8 +1,8 @@
-package bg.sofia.uni.fmi.mjt.splitwise.service.impl;
+package bg.sofia.uni.fmi.mjt.splitwise.server.service.impl;
 
-import bg.sofia.uni.fmi.mjt.splitwise.io.parser.UserParser;
-import bg.sofia.uni.fmi.mjt.splitwise.model.User;
-import bg.sofia.uni.fmi.mjt.splitwise.service.UserService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.io.parser.UserParser;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +30,5 @@ public class UserServiceImpl implements UserService {
                 .filter(user -> user.getId() == id)
                 .findFirst();
     }
-
 
 }

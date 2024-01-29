@@ -1,7 +1,7 @@
-package bg.sofia.uni.fmi.mjt.splitwise.io.parser;
+package bg.sofia.uni.fmi.mjt.splitwise.server.io.parser;
 
-import bg.sofia.uni.fmi.mjt.splitwise.io.CSVReader;
-import bg.sofia.uni.fmi.mjt.splitwise.model.User;
+import bg.sofia.uni.fmi.mjt.splitwise.server.io.CSVReader;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
