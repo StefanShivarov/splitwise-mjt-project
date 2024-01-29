@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,11 +13,15 @@ public class ClientHandler implements Runnable {
 
     private final Socket socket;
     private final AuthenticationManager authManager;
+    private final UserService userService;
     private static final String UNAUTHENTICATED_MESSAGE = "Please register or login to get started.";
 
-    public ClientHandler(Socket socket, AuthenticationManager authManager) {
+    public ClientHandler(Socket socket,
+                         AuthenticationManager authManager,
+                         UserService userService) {
         this.socket = socket;
         this.authManager = authManager;
+        this.userService = userService;
     }
 
     @Override
@@ -57,6 +62,9 @@ public class ClientHandler implements Runnable {
             case "logout":
                 handleLogout(out);
                 break;
+            case "register":
+                handleRegister(inputTokens, out);
+                break;
             default:
                 out.println("Invalid command! Try again!");
                 break;
@@ -77,12 +85,22 @@ public class ClientHandler implements Runnable {
     }
 
     private void handleLogout(PrintWriter out) {
-        if (authManager.logout()) {
-            out.println("Logout successful!");
-        } else {
+        if (!authManager.isAuthenticated()) {
             out.println("Logout failed: You are not currently logged in." +
                     " Please log in first before attempting to logout.");
+            return;
         }
+
+        authManager.logout();
+    }
+
+    private void handleRegister(String[] inputTokens, PrintWriter out) {
+        if (authManager.isAuthenticated()) {
+            out.println("Invalid command! You are already logged in.");
+            return;
+        }
+
+        userService.addUser(inputTokens[1], inputTokens[2]);
     }
 
 }
