@@ -25,12 +25,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addUser(String username, String pass) {
+    public void addUser(String username, String pass, String firstName, String lastName) {
         if (username == null || pass == null || username.isBlank() || pass.isBlank()) {
             throw new IllegalArgumentException("Invalid user credentials! User can't be created!");
         }
 
-        User user = new User(username, PasswordHasher.hashPassword(pass));
+        User user = new User(username, PasswordHasher.hashPassword(pass), firstName, lastName);
         users.add(user);
         UserCsvProcessor.writeUserToCsvFile(user);
     }

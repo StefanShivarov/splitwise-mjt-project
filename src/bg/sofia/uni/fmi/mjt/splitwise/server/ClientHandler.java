@@ -100,7 +100,12 @@ public class ClientHandler implements Runnable {
             return;
         }
 
-        userService.addUser(inputTokens[1], inputTokens[2]);
+        switch (inputTokens.length) {
+            case 3 -> userService.addUser(inputTokens[1], inputTokens[2], "", "");
+            case 4 -> userService.addUser(inputTokens[1], inputTokens[2], inputTokens[3], "");
+            case 5 -> userService.addUser(inputTokens[1], inputTokens[2], inputTokens[3], inputTokens[4]);
+            default -> out.println("Invalid user information! User can't be created!");
+        }
     }
 
 }

@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ public class UserCsvProcessor {
             return csvReader.readAllLines()
                     .stream()
                     .map(UserCsvProcessor::parseFromCsvRow)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
 
         } catch (FileNotFoundException e) {
@@ -32,7 +34,8 @@ public class UserCsvProcessor {
     }
 
     public static void writeUserToCsvFile(User user) {
-        try (var bufferedWriter = Files.newBufferedWriter(Path.of(USERS_CSV_FILE_PATH), StandardOpenOption.APPEND)) {
+        try (var bufferedWriter = Files.newBufferedWriter(Path.of(USERS_CSV_FILE_PATH),
+                StandardOpenOption.APPEND)) {
             bufferedWriter.write(parseToCsvRow(user) + System.lineSeparator());
             bufferedWriter.flush();
         } catch (IOException e) {
@@ -42,16 +45,24 @@ public class UserCsvProcessor {
 
     private static User parseFromCsvRow(String[] rowTokens) {
         int index = 0;
-        return new User(
-                rowTokens[index++],
-                rowTokens[index]
-        );
+        User user = new User(rowTokens[index++], rowTokens[index++]);
+
+        if (rowTokens.length > 2) {
+            user.setFirstName(rowTokens[index++]);
+        }
+        if (rowTokens.length > 3) {
+            user.setLastName(rowTokens[index]);
+        }
+
+        return user;
     }
 
     private static String parseToCsvRow(User user) {
-        return String.format("%s,%s",
+        return String.format("%s,%s,%s,%s",
                 user.getUsername(),
-                user.getHashedPassword());
+                user.getHashedPassword(),
+                user.getFirstName(),
+                user.getLastName());
     }
 
 }

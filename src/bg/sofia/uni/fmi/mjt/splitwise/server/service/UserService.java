@@ -8,6 +8,6 @@ public interface UserService {
 
     Optional<User> findUserByUsername(String username);
 
-    void addUser(String username, String pass);
+    void addUser(String username, String pass, String firstName, String lastName);
 
 }
