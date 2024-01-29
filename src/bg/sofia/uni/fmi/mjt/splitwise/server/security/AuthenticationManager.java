@@ -18,7 +18,10 @@ public class AuthenticationManager {
     public boolean authenticate(String username, String pass) {
         Optional<User> user = userService.findUserByUsername(username);
 
-        if (user.isPresent() && user.get().checkPassword(PasswordHasher.hashPassword(pass))) {
+        if (user.isPresent()
+                && user.get().getHashedPassword()
+                .equals(PasswordHasher.hashPassword(pass))) {
+
             currentUser = user.get();
             return true;
         }
@@ -34,13 +37,8 @@ public class AuthenticationManager {
         return currentUser != null;
     }
 
-    public boolean logout() {
-        if (currentUser == null) {
-            return false;
-        }
-
+    public void logout() {
         currentUser = null;
-        return true;
     }
 
 }
