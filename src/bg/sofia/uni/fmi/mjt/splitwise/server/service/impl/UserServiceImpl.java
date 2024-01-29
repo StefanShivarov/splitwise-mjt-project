@@ -1,7 +1,8 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.service.impl;
 
-import bg.sofia.uni.fmi.mjt.splitwise.server.io.parser.UserParser;
+import bg.sofia.uni.fmi.mjt.splitwise.server.csv.UserCsvProcessor;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
+import bg.sofia.uni.fmi.mjt.splitwise.server.security.PasswordHasher;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.util.Optional;
@@ -12,7 +13,7 @@ public class UserServiceImpl implements UserService {
     private final Set<User> users;
 
     public UserServiceImpl() {
-        this.users = UserParser.parseUsersFromCsvFile();
+        this.users = UserCsvProcessor.loadUsersFromCsvFile();
     }
 
     @Override
@@ -24,11 +25,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findUserById(long id) {
-        return users
-                .stream()
-                .filter(user -> user.getId() == id)
-                .findFirst();
+    public void addUser(String username, String pass) {
+        if (username == null || pass == null || username.isBlank() || pass.isBlank()) {
+            throw new IllegalArgumentException("Invalid user credentials! User can't be created!");
+        }
+
+        User user = new User(username, PasswordHasher.hashPassword(pass));
+        users.add(user);
+        UserCsvProcessor.writeUserToCsvFile(user);
     }
 
 }

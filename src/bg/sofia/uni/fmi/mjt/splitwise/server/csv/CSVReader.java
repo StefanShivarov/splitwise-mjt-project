@@ -1,4 +1,4 @@
-package bg.sofia.uni.fmi.mjt.splitwise.server.io;
+package bg.sofia.uni.fmi.mjt.splitwise.server.csv;
 
 import java.io.BufferedReader;
 import java.io.IOException;
