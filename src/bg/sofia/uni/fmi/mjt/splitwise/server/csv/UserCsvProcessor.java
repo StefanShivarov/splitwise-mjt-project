@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,14 +16,13 @@ public class UserCsvProcessor {
 
     private static final String USERS_CSV_FILE_PATH = "resources/users.csv";
 
-    public static Set<User> loadUsersFromCsvFile() {
+    public Set<User> loadUsersFromCsvFile() {
         try (CSVReader csvReader = new CSVReader(
                 new InputStreamReader(new FileInputStream(USERS_CSV_FILE_PATH)))) {
 
             return csvReader.readAllLines()
                     .stream()
-                    .map(UserCsvProcessor::parseFromCsvRow)
-                    .filter(Objects::nonNull)
+                    .map(this::parseFromCsvRow)
                     .collect(Collectors.toSet());
 
         } catch (FileNotFoundException e) {
@@ -33,7 +31,7 @@ public class UserCsvProcessor {
         }
     }
 
-    public static void writeUserToCsvFile(User user) {
+    public void writeUserToCsvFile(User user) {
         try (var bufferedWriter = Files.newBufferedWriter(Path.of(USERS_CSV_FILE_PATH),
                 StandardOpenOption.APPEND)) {
             bufferedWriter.write(parseToCsvRow(user) + System.lineSeparator());
@@ -43,7 +41,7 @@ public class UserCsvProcessor {
         }
     }
 
-    private static User parseFromCsvRow(String[] rowTokens) {
+    private User parseFromCsvRow(String[] rowTokens) {
         int index = 0;
         User user = new User(rowTokens[index++], rowTokens[index++]);
 
@@ -57,7 +55,7 @@ public class UserCsvProcessor {
         return user;
     }
 
-    private static String parseToCsvRow(User user) {
+    private String parseToCsvRow(User user) {
         return String.format("%s,%s,%s,%s",
                 user.getUsername(),
                 user.getHashedPassword(),

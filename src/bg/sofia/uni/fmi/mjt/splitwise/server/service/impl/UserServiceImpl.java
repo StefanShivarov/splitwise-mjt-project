@@ -11,9 +11,11 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
     private final Set<User> users;
+    private final UserCsvProcessor userCsvProcessor;
 
     public UserServiceImpl() {
-        this.users = UserCsvProcessor.loadUsersFromCsvFile();
+        this.userCsvProcessor = new UserCsvProcessor();
+        this.users = userCsvProcessor.loadUsersFromCsvFile();
     }
 
     @Override
@@ -32,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
         User user = new User(username, PasswordHasher.hashPassword(pass), firstName, lastName);
         users.add(user);
-        UserCsvProcessor.writeUserToCsvFile(user);
+        userCsvProcessor.writeUserToCsvFile(user);
     }
 
 }
