@@ -1,9 +1,12 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.Group;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.GroupService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.io.BufferedReader;
@@ -11,7 +14,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ClientHandler implements Runnable {
@@ -20,16 +25,20 @@ public class ClientHandler implements Runnable {
     private final AuthenticationManager authManager;
     private final UserService userService;
     private final FriendshipService friendshipService;
+    private final GroupService groupService;
     private static final String UNAUTHENTICATED_MESSAGE = "Please register or login to get started.";
+    private static final String CLIENT_WELCOME_MESSAGE = "---------Welcome to Splitwise!---------";
 
     public ClientHandler(Socket socket,
                          AuthenticationManager authManager,
                          UserService userService,
-                         FriendshipService friendshipService) {
+                         FriendshipService friendshipService,
+                         GroupService groupService) {
         this.socket = socket;
         this.authManager = authManager;
         this.userService = userService;
         this.friendshipService = friendshipService;
+        this.groupService = groupService;
     }
 
     @Override
@@ -39,6 +48,7 @@ public class ClientHandler implements Runnable {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
 
+            out.println(CLIENT_WELCOME_MESSAGE);
             out.println(UNAUTHENTICATED_MESSAGE);
             String input;
             while ((input = in.readLine()) != null) {
@@ -49,7 +59,6 @@ public class ClientHandler implements Runnable {
                     out.println(UNAUTHENTICATED_MESSAGE);
                 }
             }
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -63,44 +72,40 @@ public class ClientHandler implements Runnable {
 
     private void handleInput(String input, PrintWriter out) {
         String[] inputTokens = input.split("\\s+");
-        switch (inputTokens[0]) {
-            case "login":
-                handleLogin(inputTokens, out);
-                break;
-            case "logout":
-                handleLogout(out);
-                break;
-            case "register":
-                handleRegister(inputTokens, out);
-                break;
-            case "add-friend":
-                handleAddFriend(inputTokens, out);
-                break;
-            case "my-friends":
-                handleShowFriends(out);
-                break;
-            default:
-                out.println("Invalid command!oo Try again!");
-                break;
+        try {
+            switch (inputTokens[0]) {
+                case "login" -> handleLogin(inputTokens, out);
+                case "logout" -> handleLogout(out);
+                case "register" -> handleRegister(inputTokens, out);
+                case "add-friend" -> handleAddFriend(inputTokens, out);
+                case "create-group" -> handleCreateGroup(inputTokens, out);
+                case "my-friends" -> handleShowFriends(out);
+                case "my-groups" -> handleShowGroups(out);
+                default -> out.println("Invalid command! Try again!");
+            }
+        } catch (InvalidCommandInputException e) {
+            out.println(e.getMessage());
         }
+
     }
 
     private void handleLogin(String[] inputTokens, PrintWriter out) {
         if (authManager.isAuthenticated()) {
-            out.println("Invalid command! You are already logged in.");
+            out.println("You don't have access to this command! You are already logged in.");
             return;
         }
 
         if (authManager.authenticate(inputTokens[1], inputTokens[2])) {
-            out.println("Welcome, " + authManager.getAuthenticatedUser().getUsername());
+            out.println("Welcome, " + authManager.getAuthenticatedUser().getUsername() + "!");
         } else {
-            out.println("Invalid credentials!");
+            out.println("Invalid credentials! Login unsuccessful!");
         }
     }
 
     private void handleLogout(PrintWriter out) {
         if (!authManager.isAuthenticated()) {
-            out.println("Logout failed: You are not currently logged in." +
+            out.println("You don't have access to this command!" +
+                    " You are not currently logged in." +
                     " Please log in first before attempting to logout.");
             return;
         }
@@ -110,7 +115,7 @@ public class ClientHandler implements Runnable {
 
     private void handleRegister(String[] inputTokens, PrintWriter out) {
         if (authManager.isAuthenticated()) {
-            out.println("Invalid command! You are already logged in.");
+            out.println("You don't have access to this command! You are already logged in.");
             return;
         }
 
@@ -124,7 +129,7 @@ public class ClientHandler implements Runnable {
 
     private void handleAddFriend(String[] inputTokens, PrintWriter out) {
         if (!authManager.isAuthenticated()) {
-            out.println("Invalid command! You are not authenticated.");
+            out.println("You don't have access to this command! You are not authenticated.");
             return;
         }
 
@@ -161,6 +166,64 @@ public class ClientHandler implements Runnable {
                     .collect(Collectors.joining(System.lineSeparator())));
 
             out.println(friendListOutput);
+
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
+    }
+
+    private void handleCreateGroup(String[] inputTokens, PrintWriter out) throws InvalidCommandInputException {
+        if (!authManager.isAuthenticated()) {
+            out.println("You don't have access to this command! You are not authenticated.");
+            return;
+        }
+
+        if (inputTokens.length < 4) {
+            throw new InvalidCommandInputException(
+                    "Invalid command! Group must have a name and at least two more members!");
+        }
+
+        String groupName = inputTokens[1];
+        Set<String> usernames = Arrays.stream(inputTokens)
+                .skip(2)
+                .collect(Collectors.toSet());
+
+        groupService.addGroup(groupName, usernames);
+        out.println("Successfully created group " + groupName + "!");
+    }
+
+    private void handleShowGroups(PrintWriter out) {
+        if (!authManager.isAuthenticated()) {
+            out.println();
+            return;
+        }
+
+        StringBuilder groupsOutput = new StringBuilder("Groups:")
+                .append(System.lineSeparator());
+
+        try {
+            Collection<Group> groups = groupService
+                    .getGroupsForUser(authManager.getAuthenticatedUser().getUsername());
+
+            if (groups.isEmpty()) {
+                out.println("No groups to show.");
+                return;
+            }
+
+            groupsOutput.append(groups
+                    .stream()
+                    .map(group -> "- " +
+                            group.getName() +
+                            System.lineSeparator() +
+                            group.getUsers()
+                                    .stream()
+                                    .map(user -> "-- " + user.getUsername())
+                                    .sorted()
+                                    .collect(Collectors.joining(System.lineSeparator()))
+                    )
+                    .collect(Collectors.joining(System.lineSeparator())));
+
+            out.println(groupsOutput);
 
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
