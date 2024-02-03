@@ -8,7 +8,7 @@ import java.util.Collection;
 
 public interface FriendshipService {
 
-    Collection<User> getFriendsForUser(String username);
+    Collection<User> getFriendsForUser(String username) throws UserNotFoundException;
 
     void addFriendship(String firstUsername, String secondUsername) throws UserNotFoundException;
 

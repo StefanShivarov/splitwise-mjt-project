@@ -26,11 +26,10 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public Collection<User> getFriendsForUser(String username) {
+    public Collection<User> getFriendsForUser(String username) throws UserNotFoundException {
         if (userService.findUserByUsername(username).isEmpty()) {
-            throw new UserNotFoundException();
+            throw new UserNotFoundException("User with username " + username + " not found!");
         }
-
 
         return friendships
                 .stream()
