@@ -60,10 +60,10 @@ public class FriendshipServiceImpl implements FriendshipService {
         Optional<User> secondUser = userService.findUserByUsername(secondUsername);
 
         if (firstUser.isEmpty()) {
-            throw new UserNotFoundException("No user with username " + firstUsername + " exists!");
+            throw new UserNotFoundException("User with username " + firstUsername + " was not found!");
         }
         if (secondUser.isEmpty()) {
-            throw new UserNotFoundException("No user with username " + secondUsername + " exists!");
+            throw new UserNotFoundException("User with username " + firstUsername + " was not found!");
         }
 
         Friendship friendship = new Friendship(firstUser.get(), secondUser.get());
