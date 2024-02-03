@@ -1,7 +1,9 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.FriendshipServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.UserServiceImpl;
 
 import java.io.IOException;
@@ -20,6 +22,7 @@ public class SplitwiseServer {
         Thread.currentThread().setName("Splitwise Server Thread");
 
         UserService userService = new UserServiceImpl();
+        FriendshipService friendshipService = new FriendshipServiceImpl(userService);
 
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
             Socket clientSocket;
@@ -27,7 +30,10 @@ public class SplitwiseServer {
             while (true) {
                 clientSocket = serverSocket.accept();
                 System.out.println("New client connected.");
-                executor.execute(new ClientHandler(clientSocket, new AuthenticationManager(userService), userService, friendshipService));
+                executor.execute(new ClientHandler(clientSocket,
+                        new AuthenticationManager(userService),
+                        userService,
+                        friendshipService));
             }
         } catch (IOException e) {
             throw new RuntimeException("Error occurred with the server socket!", e);

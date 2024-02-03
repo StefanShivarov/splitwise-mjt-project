@@ -50,4 +50,14 @@ public class User {
                 username);
     }
 
+    public String getFullName() {
+        if (firstName.isBlank() || lastName.isBlank()) {
+            return username;
+        }
+
+        return String.format("%s %s",
+                firstName,
+                lastName);
+    }
+
 }

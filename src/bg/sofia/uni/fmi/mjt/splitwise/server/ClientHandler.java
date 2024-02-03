@@ -1,6 +1,9 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.io.BufferedReader;
@@ -8,20 +11,25 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class ClientHandler implements Runnable {
 
     private final Socket socket;
     private final AuthenticationManager authManager;
     private final UserService userService;
+    private final FriendshipService friendshipService;
     private static final String UNAUTHENTICATED_MESSAGE = "Please register or login to get started.";
 
     public ClientHandler(Socket socket,
                          AuthenticationManager authManager,
-                         UserService userService) {
+                         UserService userService,
+                         FriendshipService friendshipService) {
         this.socket = socket;
         this.authManager = authManager;
         this.userService = userService;
+        this.friendshipService = friendshipService;
     }
 
     @Override
@@ -65,8 +73,14 @@ public class ClientHandler implements Runnable {
             case "register":
                 handleRegister(inputTokens, out);
                 break;
+            case "add-friend":
+                handleAddFriend(inputTokens, out);
+                break;
+            case "my-friends":
+                handleShowFriends(out);
+                break;
             default:
-                out.println("Invalid command! Try again!");
+                out.println("Invalid command!oo Try again!");
                 break;
         }
     }
@@ -107,5 +121,51 @@ public class ClientHandler implements Runnable {
             default -> out.println("Invalid user information! User can't be created!");
         }
     }
+
+    private void handleAddFriend(String[] inputTokens, PrintWriter out) {
+        if (!authManager.isAuthenticated()) {
+            out.println("Invalid command! You are not authenticated.");
+            return;
+        }
+
+        String addFriendUsername = inputTokens[1];
+        try {
+            friendshipService.addFriendship(authManager.getAuthenticatedUser().getUsername(),
+                    addFriendUsername);
+            out.println("Successfully added " + addFriendUsername + " to your friend list!");
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
+    }
+
+    private void handleShowFriends(PrintWriter out) {
+        if (!authManager.isAuthenticated()) {
+            out.println("Invalid command! You are not authenticated.");
+            return;
+        }
+
+        StringBuilder friendListOutput = new StringBuilder("Friends: ")
+                .append(System.lineSeparator());
+        try {
+            Collection<User> friends = friendshipService
+                    .getFriendsForUser(authManager.getAuthenticatedUser().getUsername());
+
+            if (friends.isEmpty()) {
+                out.println("No friends to show.");
+                return;
+            }
+
+            friendListOutput.append(friends
+                    .stream()
+                    .map(User::getFullName)
+                    .collect(Collectors.joining(System.lineSeparator())));
+
+            out.println(friendListOutput);
+
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
+    }
+
 
 }

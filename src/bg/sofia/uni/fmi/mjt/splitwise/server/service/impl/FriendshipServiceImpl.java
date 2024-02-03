@@ -8,6 +8,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +43,9 @@ public class FriendshipServiceImpl implements FriendshipService {
                         .findFirst()
                         .orElse(null))
                 .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(User::getFullName))
+                .toList()
+                .stream()
                 .collect(Collectors.toUnmodifiableSet());
     }
 
