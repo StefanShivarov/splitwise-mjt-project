@@ -26,7 +26,7 @@ public class FriendshipCsvProcessor {
     }
 
     public Set<Friendship> loadFriendshipsFromCsvFile() {
-        try (CSVReader csvReader = new CSVReader(
+        try (CsvReader csvReader = new CsvReader(
                 new InputStreamReader(new FileInputStream(FRIENDSHIPS_CSV_FILE_PATH)))) {
 
             return csvReader.readAllLines()
@@ -64,8 +64,8 @@ public class FriendshipCsvProcessor {
 
     private String parseToCsvRow(Friendship friendship) {
         return String.format("%s,%s",
-                friendship.getFirstUser().getUsername(),
-                friendship.getSecondUser().getUsername());
+                friendship.firstUser().getUsername(),
+                friendship.secondUser().getUsername());
     }
 
 }
