@@ -27,7 +27,7 @@ public class SplitwiseServer {
             while (true) {
                 clientSocket = serverSocket.accept();
                 System.out.println("New client connected.");
-                executor.execute(new ClientHandler(clientSocket, new AuthenticationManager(userService), userService));
+                executor.execute(new ClientHandler(clientSocket, new AuthenticationManager(userService), userService, friendshipService));
             }
         } catch (IOException e) {
             throw new RuntimeException("Error occurred with the server socket!", e);
