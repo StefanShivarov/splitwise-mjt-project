@@ -17,7 +17,7 @@ public class UserCsvProcessor {
     private static final String USERS_CSV_FILE_PATH = "resources/users.csv";
 
     public Set<User> loadUsersFromCsvFile() {
-        try (CSVReader csvReader = new CSVReader(
+        try (CsvReader csvReader = new CsvReader(
                 new InputStreamReader(new FileInputStream(USERS_CSV_FILE_PATH)))) {
 
             return csvReader.readAllLines()

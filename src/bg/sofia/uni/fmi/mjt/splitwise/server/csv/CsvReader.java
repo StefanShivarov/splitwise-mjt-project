@@ -6,11 +6,11 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CSVReader implements AutoCloseable {
+public class CsvReader implements AutoCloseable {
 
     private final BufferedReader reader;
 
-    public CSVReader(Reader reader) {
+    public CsvReader(Reader reader) {
         this.reader = new BufferedReader(reader);
     }
 
