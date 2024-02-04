@@ -7,23 +7,23 @@ import java.util.Set;
 public class Group {
 
     private final String name;
-    private final Set<User> users;
+    private final Set<User> participants;
 
     public Group(String name, Set<User> users) {
         this.name = name;
-        this.users = users;
+        this.participants = users;
     }
 
     public String getName() {
         return name;
     }
 
-    public Collection<User> getUsers() {
-        return Collections.unmodifiableSet(users);
+    public Collection<User> getParticipants() {
+        return Collections.unmodifiableSet(participants);
     }
 
-    public boolean addUser(User user) {
-        return users.add(user);
+    public boolean addParticipant(User user) {
+        return participants.add(user);
     }
 
 }

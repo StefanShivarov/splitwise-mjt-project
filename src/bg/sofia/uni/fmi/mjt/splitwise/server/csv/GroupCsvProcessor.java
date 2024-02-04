@@ -71,7 +71,7 @@ public class GroupCsvProcessor {
     private String parseToCsvRow(Group group) {
         return String.format("%s,%s",
                 group.getName(),
-                group.getUsers()
+                group.getParticipants()
                         .stream().map(User::getUsername)
                         .collect(Collectors.joining(",")));
     }

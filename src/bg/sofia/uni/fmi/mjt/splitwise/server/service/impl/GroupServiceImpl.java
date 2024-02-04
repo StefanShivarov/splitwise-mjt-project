@@ -34,7 +34,7 @@ public class GroupServiceImpl implements GroupService {
 
         return groups
                 .stream()
-                .filter(group -> group.getUsers().contains(user.get()))
+                .filter(group -> group.getParticipants().contains(user.get()))
                 .sorted(Comparator.comparing(Group::getName))
                 .toList()
                 .stream()
