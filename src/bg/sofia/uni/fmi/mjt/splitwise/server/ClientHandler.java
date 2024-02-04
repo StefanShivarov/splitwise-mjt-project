@@ -5,8 +5,10 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Group;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.GroupService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.ObligationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.io.BufferedReader;
@@ -16,6 +18,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,8 @@ public class ClientHandler implements Runnable {
     private final UserService userService;
     private final FriendshipService friendshipService;
     private final GroupService groupService;
+    private final ExpenseService expenseService;
+    private final ObligationService obligationService;
     private static final String UNAUTHENTICATED_MESSAGE = "Please register or login to get started.";
     private static final String CLIENT_WELCOME_MESSAGE = "---------Welcome to Splitwise!---------";
 
@@ -33,12 +38,16 @@ public class ClientHandler implements Runnable {
                          AuthenticationManager authManager,
                          UserService userService,
                          FriendshipService friendshipService,
-                         GroupService groupService) {
+                         GroupService groupService,
+                         ExpenseService expenseService,
+                         ObligationService obligationService) {
         this.socket = socket;
         this.authManager = authManager;
         this.userService = userService;
         this.friendshipService = friendshipService;
         this.groupService = groupService;
+        this.expenseService = expenseService;
+        this.obligationService = obligationService;
     }
 
     @Override
@@ -74,6 +83,7 @@ public class ClientHandler implements Runnable {
         String[] inputTokens = input.split("\\s+");
         try {
             switch (inputTokens[0]) {
+                case "help" -> showHelpInfo(out);
                 case "login" -> handleLogin(inputTokens, out);
                 case "logout" -> handleLogout(out);
                 case "register" -> handleRegister(inputTokens, out);
@@ -81,12 +91,19 @@ public class ClientHandler implements Runnable {
                 case "create-group" -> handleCreateGroup(inputTokens, out);
                 case "my-friends" -> handleShowFriends(out);
                 case "my-groups" -> handleShowGroups(out);
+                case "split" -> handleSplitWithFriend(inputTokens, out);
+                case "split-group" -> handleSplitWithGroup(inputTokens, out);
+                case "payed" -> handleReceivePayment(inputTokens, out);
                 default -> out.println("Invalid command! Try again!");
             }
         } catch (InvalidCommandInputException e) {
             out.println(e.getMessage());
         }
 
+    }
+
+    private void showHelpInfo(PrintWriter out) {
+        //TODO: make help text
     }
 
     private void handleLogin(String[] inputTokens, PrintWriter out) {
@@ -216,7 +233,7 @@ public class ClientHandler implements Runnable {
                     .map(group -> "* " +
                             group.getName() +
                             System.lineSeparator() +
-                            group.getParticipants()
+                            group.getMembers()
                                     .stream()
                                     .filter(user -> !user.getUsername().equals(
                                             authManager.getAuthenticatedUser().getUsername()))
@@ -228,6 +245,76 @@ public class ClientHandler implements Runnable {
 
             out.println(groupsOutput);
 
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
+    }
+
+    private void handleSplitWithFriend(String[] inputTokens, PrintWriter out) throws InvalidCommandInputException {
+        if (inputTokens.length < 4) {
+            throw new InvalidCommandInputException("Invalid command! " +
+                    "Split command must be split <amount> <username> <desc>.");
+        }
+
+        double amount = Double.parseDouble(inputTokens[1]);
+        String friendUsername = inputTokens[2];
+        String description = inputTokens[3];
+
+        try{
+            if (!friendshipService.checkFriendship(
+                    authManager.getAuthenticatedUser().getUsername(), friendUsername)) {
+                out.println("Error! " + friendUsername + " is not your friend!");
+            }
+
+            expenseService.addExpense(authManager.getAuthenticatedUser().getUsername(),
+                    description,
+                    amount,
+                    Set.of(friendUsername));
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
+    }
+
+    private void handleSplitWithGroup(String[] inputTokens, PrintWriter out)
+            throws InvalidCommandInputException {
+        if (inputTokens.length < 4) {
+            throw new InvalidCommandInputException("Invalid command! " +
+                    "Split command must be split-group <amount> <group_name> <desc>.");
+        }
+
+        double amount = Double.parseDouble(inputTokens[1]);
+        String groupName = inputTokens[2];
+        String description = inputTokens[3];
+
+        Optional<Group> group = groupService.findGroupByName(groupName);
+        if (group.isEmpty()) {
+            out.println("Error! You are not part of a group called " + groupName + "!");
+            return;
+        }
+
+        Set<String> usernames = group.get().getMembers()
+                .stream()
+                .map(User::getUsername)
+                .collect(Collectors.toSet());
+
+        try {
+            expenseService.addExpense(authManager.getAuthenticatedUser().getUsername(),
+                    description,
+                    amount,
+                    usernames);
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
+    }
+
+    private void handleReceivePayment(String[] inputTokens, PrintWriter out) {
+        double amount = Double.parseDouble(inputTokens[1]);
+        String payerUsername = inputTokens[2];
+
+        try {
+            obligationService.updateObligation(payerUsername,
+                    authManager.getAuthenticatedUser().getUsername(),
+                    amount);
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }

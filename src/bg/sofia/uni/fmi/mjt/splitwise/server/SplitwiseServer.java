@@ -1,11 +1,15 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.GroupService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.ObligationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.ExpenseServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.FriendshipServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.GroupServiceImpl;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.ObligationServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.UserServiceImpl;
 
 import java.io.IOException;
@@ -26,6 +30,8 @@ public class SplitwiseServer {
         UserService userService = new UserServiceImpl();
         FriendshipService friendshipService = new FriendshipServiceImpl(userService);
         GroupService groupService = new GroupServiceImpl(userService);
+        ObligationService obligationService = new ObligationServiceImpl(userService);
+        ExpenseService expenseService = new ExpenseServiceImpl(userService, obligationService);
 
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
             Socket clientSocket;
@@ -37,7 +43,9 @@ public class SplitwiseServer {
                         new AuthenticationManager(userService),
                         userService,
                         friendshipService,
-                        groupService));
+                        groupService,
+                        expenseService,
+                        obligationService));
             }
         } catch (IOException e) {
             throw new RuntimeException("Error occurred with the server socket!", e);
