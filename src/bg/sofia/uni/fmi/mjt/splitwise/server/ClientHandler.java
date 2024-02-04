@@ -187,6 +187,7 @@ public class ClientHandler implements Runnable {
         Set<String> usernames = Arrays.stream(inputTokens)
                 .skip(2)
                 .collect(Collectors.toSet());
+        usernames.add(authManager.getAuthenticatedUser().getUsername());
 
         groupService.addGroup(groupName, usernames);
         out.println("Successfully created group " + groupName + "!");
@@ -212,11 +213,13 @@ public class ClientHandler implements Runnable {
 
             groupsOutput.append(groups
                     .stream()
-                    .map(group -> "- " +
+                    .map(group -> "* " +
                             group.getName() +
                             System.lineSeparator() +
-                            group.getUsers()
+                            group.getParticipants()
                                     .stream()
+                                    .filter(user -> !user.getUsername().equals(
+                                            authManager.getAuthenticatedUser().getUsername()))
                                     .map(user -> "-- " + user.getUsername())
                                     .sorted()
                                     .collect(Collectors.joining(System.lineSeparator()))
@@ -229,6 +232,5 @@ public class ClientHandler implements Runnable {
             out.println(e.getMessage());
         }
     }
-
 
 }
