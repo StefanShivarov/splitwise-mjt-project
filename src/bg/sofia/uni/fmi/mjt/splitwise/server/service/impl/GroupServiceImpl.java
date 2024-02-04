@@ -34,7 +34,7 @@ public class GroupServiceImpl implements GroupService {
 
         return groups
                 .stream()
-                .filter(group -> group.getParticipants().contains(user.get()))
+                .filter(group -> group.getMembers().contains(user.get()))
                 .sorted(Comparator.comparing(Group::getName))
                 .toList()
                 .stream()
@@ -57,6 +57,14 @@ public class GroupServiceImpl implements GroupService {
         Group group = new Group(name, users);
         groups.add(group);
         groupCsvProcessor.writeGroupToCsvFile(group);
+    }
+
+    @Override
+    public Optional<Group> findGroupByName(String name) {
+        return groups
+                .stream()
+                .filter(group -> group.getName().equals(name))
+                .findFirst();
     }
 
 }
