@@ -12,4 +12,6 @@ public interface FriendshipService {
 
     void addFriendship(String firstUsername, String secondUsername) throws UserNotFoundException;
 
+    boolean checkFriendship(String firstUsername, String secondUsername) throws UserNotFoundException;
+
 }

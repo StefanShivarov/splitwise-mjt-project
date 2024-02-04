@@ -71,4 +71,11 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendshipCsvProcessor.writeFriendshipToCsvFile(friendship);
     }
 
+    @Override
+    public boolean checkFriendship(String firstUsername, String secondUsername) throws UserNotFoundException {
+        return getFriendsForUser(firstUsername)
+                .stream()
+                .anyMatch(user -> user.getUsername().equals(secondUsername));
+    }
+
 }
