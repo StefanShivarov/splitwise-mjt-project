@@ -3,6 +3,7 @@ package bg.sofia.uni.fmi.mjt.splitwise.server.csv;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,21 @@ public class CsvReader implements AutoCloseable {
             }
 
             return lines;
+        } catch (IOException e) {
+            throw new RuntimeException("There was an error while reading the file!", e);
+        }
+    }
+
+    public List<String> readAllLinesRaw() {
+        List<String> rawLines = new ArrayList<>();
+
+        try {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                rawLines.add(line);
+            }
+
+            return rawLines;
         } catch (IOException e) {
             throw new RuntimeException("There was an error while reading the file!", e);
         }
