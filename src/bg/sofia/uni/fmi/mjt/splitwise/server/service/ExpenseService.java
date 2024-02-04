@@ -10,6 +10,7 @@ public interface ExpenseService {
 
     Collection<Expense> getExpensesPaidByUser(String username) throws UserNotFoundException;
 
-    void addExpense(String payerUsername, String description, double amount, Set<String> participants);
+    void addExpense(String payerUsername, String description, double amount, Set<String> participantsUsernames)
+            throws UserNotFoundException;
 
 }
