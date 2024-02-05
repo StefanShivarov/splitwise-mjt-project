@@ -4,11 +4,13 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.GroupService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.NotificationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ObligationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.ExpenseServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.FriendshipServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.GroupServiceImpl;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.NotificationServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.ObligationServiceImpl;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.UserServiceImpl;
 
@@ -32,6 +34,7 @@ public class SplitwiseServer {
         GroupService groupService = new GroupServiceImpl(userService);
         ObligationService obligationService = new ObligationServiceImpl(userService);
         ExpenseService expenseService = new ExpenseServiceImpl(userService, obligationService);
+        NotificationService notificationService = new NotificationServiceImpl(userService);
 
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
             Socket clientSocket;
@@ -45,7 +48,8 @@ public class SplitwiseServer {
                         friendshipService,
                         groupService,
                         expenseService,
-                        obligationService));
+                        obligationService,
+                        notificationService));
             }
         } catch (IOException e) {
             throw new RuntimeException("Error occurred with the server socket!", e);

@@ -3,12 +3,14 @@ package bg.sofia.uni.fmi.mjt.splitwise.server;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Group;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.Notification;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Obligation;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.GroupService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.NotificationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ObligationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
@@ -22,6 +24,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,6 +38,7 @@ public class ClientHandler implements Runnable {
     private final GroupService groupService;
     private final ExpenseService expenseService;
     private final ObligationService obligationService;
+    private final NotificationService notificationService;
     private static final DecimalFormat decimalFormat = new DecimalFormat(
             "#.00", DecimalFormatSymbols.getInstance(Locale.US));
     private static final String UNAUTHENTICATED_MESSAGE = "Please register or login to get started.";
@@ -46,7 +50,8 @@ public class ClientHandler implements Runnable {
                          FriendshipService friendshipService,
                          GroupService groupService,
                          ExpenseService expenseService,
-                         ObligationService obligationService) {
+                         ObligationService obligationService,
+                         NotificationService notificationService) {
         this.socket = socket;
         this.authManager = authManager;
         this.userService = userService;
@@ -54,6 +59,7 @@ public class ClientHandler implements Runnable {
         this.groupService = groupService;
         this.expenseService = expenseService;
         this.obligationService = obligationService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -73,6 +79,7 @@ public class ClientHandler implements Runnable {
                 if (!authManager.isAuthenticated()) {
                     out.println(UNAUTHENTICATED_MESSAGE);
                 }
+
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -97,6 +104,8 @@ public class ClientHandler implements Runnable {
                 case "create-group" -> handleCreateGroup(inputTokens, out);
                 case "my-friends" -> handleShowFriends(out);
                 case "my-groups" -> handleShowGroups(out);
+                case "notifications" -> out.println(getUnseenNotifications());
+                case "old-notifications" -> showOldNotifications(out);
                 case "split" -> handleSplitWithFriend(inputTokens, out);
                 case "split-group" -> handleSplitWithGroup(inputTokens, out);
                 case "payed" -> handleReceivePayment(inputTokens, out);
@@ -105,7 +114,6 @@ public class ClientHandler implements Runnable {
         } catch (InvalidCommandInputException e) {
             out.println(e.getMessage());
         }
-
     }
 
     private void showHelpInfo(PrintWriter out) {
@@ -123,9 +131,52 @@ public class ClientHandler implements Runnable {
         }
 
         if (authManager.authenticate(inputTokens[1], inputTokens[2])) {
-            out.println("Welcome, " + authManager.getAuthenticatedUser().getUsername() + "!");
+            out.println("Welcome, " + authManager.getAuthenticatedUser().getUsername() + "!"
+                    + System.lineSeparator() + getUnseenNotifications());
         } else {
             out.println("Invalid credentials! Login unsuccessful!");
+        }
+    }
+
+    private String getUnseenNotifications() {
+        try {
+            Collection<Notification> notifications = notificationService
+                    .getUnseenNotificationsForUser(authManager.getAuthenticatedUser().getUsername());
+
+            if (notifications.isEmpty()) {
+                return "No new notifications to show.";
+            }
+
+            notificationService.markNotificationsAsSeen(notifications);
+
+            return "*** Notifications ***" +
+                    System.lineSeparator() +
+                    notifications
+                            .stream()
+                            .map(Notification::toString)
+                            .collect(Collectors.joining(System.lineSeparator()));
+        } catch (UserNotFoundException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private void showOldNotifications(PrintWriter out) {
+        try {
+            Collection<Notification> notifications = notificationService
+                    .getAllNotificationsForUser(authManager.getAuthenticatedUser().getUsername());
+
+            if (notifications.isEmpty()) {
+                out.println("No notifications to show.");
+                return;
+            }
+
+            out.println("--- Old notifications ---" +
+                    System.lineSeparator() + notifications
+                    .stream()
+                    .map(Notification::toString)
+                    .collect(Collectors.joining(System.lineSeparator())));
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
         }
     }
 
@@ -164,6 +215,12 @@ public class ClientHandler implements Runnable {
         try {
             friendshipService.addFriendship(authManager.getAuthenticatedUser().getUsername(),
                     addFriendUsername);
+
+            notificationService.addNotification(
+                    authManager.getAuthenticatedUser().getFullName() +
+                            " added you as a friend!",
+                    addFriendUsername);
+
             out.println("Successfully added " + addFriendUsername + " to your friend list!");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
@@ -191,6 +248,7 @@ public class ClientHandler implements Runnable {
                     .stream()
                     .map(User::getUsername)
                     .map(this::getObligationStatusWithUser)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.joining(System.lineSeparator())));
 
             out.println(friendListOutput);
@@ -216,6 +274,19 @@ public class ClientHandler implements Runnable {
                 .skip(2)
                 .collect(Collectors.toSet());
         usernames.add(authManager.getAuthenticatedUser().getUsername());
+
+        try {
+            for (String username : usernames) {
+                if (!username.equals(authManager.getAuthenticatedUser().getUsername())) {
+                    notificationService.addNotification(
+                            authManager.getAuthenticatedUser().getFullName() +
+                                    "added you to group" + groupName + ".",
+                            username);
+                }
+            }
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
 
         groupService.addGroup(groupName, usernames);
         out.println("Successfully created group " + groupName + "!");
@@ -250,6 +321,7 @@ public class ClientHandler implements Runnable {
                                     .filter(username -> !username.equals(
                                             authManager.getAuthenticatedUser().getUsername()))
                                     .map(this::getObligationStatusWithUser)
+                                    .filter(Objects::nonNull)
                                     .sorted()
                                     .map(str -> "-- " + str)
                                     .collect(Collectors.joining(System.lineSeparator()))
@@ -283,6 +355,14 @@ public class ClientHandler implements Runnable {
                     description,
                     amount,
                     Set.of(friendUsername));
+
+            notificationService.addNotification(
+                    String.format("%s paid %s (%s each) for you [%s].",
+                            authManager.getAuthenticatedUser().getFullName(),
+                            decimalFormat.format(amount),
+                            decimalFormat.format(amount / 2),
+                            description),
+                    friendUsername);
 
             out.println("You split " + decimalFormat.format(amount) + " with " + friendUsername + ".");
         } catch (UserNotFoundException e) {
@@ -319,6 +399,15 @@ public class ClientHandler implements Runnable {
                     amount,
                     usernames);
 
+            notificationService.addNotification(
+                    String.format("%s paid %s (%s each) for group %s [%s].",
+                            authManager.getAuthenticatedUser().getFullName(),
+                            decimalFormat.format(amount),
+                            decimalFormat.format(amount / (usernames.size() + 1)),
+                            groupName,
+                            description),
+                    usernames);
+
             out.println("You split " + decimalFormat.format(amount) + " with group" + groupName + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
@@ -334,6 +423,12 @@ public class ClientHandler implements Runnable {
                     authManager.getAuthenticatedUser().getUsername(),
                     amount);
 
+            notificationService.addNotification(
+                    String.format("%s approved your payment of %s.",
+                            authManager.getAuthenticatedUser().getFullName(),
+                            decimalFormat.format(amount)),
+                    payerUsername);
+
             out.println(payerUsername + " payed you " + decimalFormat.format(amount) + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
@@ -342,6 +437,9 @@ public class ClientHandler implements Runnable {
 
     private String getObligationStatusWithUser(String username) {
         Optional<User> otherUser = userService.findUserByUsername(username);
+        if (otherUser.isEmpty()) {
+            return null;
+        }
 
         Optional<Obligation> obligation = obligationService
                 .findObligationByUsers(authManager.getAuthenticatedUser(), otherUser.get());
