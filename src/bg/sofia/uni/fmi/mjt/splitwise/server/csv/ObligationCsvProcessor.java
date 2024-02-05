@@ -74,20 +74,20 @@ public class ObligationCsvProcessor {
                         "Error! Can't update obligation that is not in database!");
             }
 
+            csvLines.remove(lineIndex.getAsInt());
+            csvLines.add(parseToCsvRow(updatedObligation));
+
             try(var bufferedWriter = Files.newBufferedWriter(Path.of(OBLIGATIONS_CSV_FILE_PATH))) {
-                csvLines.remove(lineIndex.getAsInt());
-                csvLines.add(parseToCsvRow(updatedObligation));
                 bufferedWriter.write("");
 
                 for (String line : csvLines) {
                     bufferedWriter.write(line + System.lineSeparator());
                 }
+
                 bufferedWriter.flush();
             } catch (IOException e) {
                 throw new RuntimeException("Error while writing to file!", e);
-            };
-
-
+            }
         } catch (IOException e) {
             throw new RuntimeException("Error while updating obligation in database!", e);
         }
