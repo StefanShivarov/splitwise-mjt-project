@@ -2,6 +2,7 @@ package bg.sofia.uni.fmi.mjt.splitwise.server;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.Expense;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Group;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Notification;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Obligation;
@@ -109,6 +110,7 @@ public class ClientHandler implements Runnable {
                 case "split" -> handleSplitWithFriend(inputTokens, out);
                 case "split-group" -> handleSplitWithGroup(inputTokens, out);
                 case "payed" -> handleReceivePayment(inputTokens, out);
+                case "my-expenses" -> showExpensesHistory(out);
                 default -> out.println("Invalid command! Try again!");
             }
         } catch (InvalidCommandInputException e) {
@@ -457,6 +459,20 @@ public class ClientHandler implements Runnable {
         }
 
         return String.format("%s%s", otherUser.get(), obligationStatus);
+    }
+
+    private void showExpensesHistory(PrintWriter out){
+        try {
+            out.println("--- My expenses ---" + System.lineSeparator() +
+                    expenseService
+                    .getExpensesPaidByUser(
+                            authManager.getAuthenticatedUser().getUsername())
+                    .stream()
+                    .map(Expense::toString)
+                    .collect(Collectors.joining(System.lineSeparator())));
+        } catch (UserNotFoundException e) {
+            out.println(e.getMessage());
+        }
     }
 
 }
