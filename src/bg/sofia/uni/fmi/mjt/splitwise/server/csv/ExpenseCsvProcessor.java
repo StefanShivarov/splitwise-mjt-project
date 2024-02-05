@@ -11,8 +11,11 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -20,6 +23,8 @@ import java.util.stream.Collectors;
 
 public class ExpenseCsvProcessor {
 
+    private static final DecimalFormat decimalFormat = new DecimalFormat(
+            "#.00", DecimalFormatSymbols.getInstance(Locale.US));
     private static final String EXPENSES_CSV_FILE_PATH = "resources/expenses.csv";
     private final UserService userService;
 
@@ -82,10 +87,10 @@ public class ExpenseCsvProcessor {
     }
 
     private String parseToCsvRow(Expense expense) {
-        return String.format("%s,%s,%f,%s",
+        return String.format("%s,%s,%s,%s",
                 expense.payer().getUsername(),
                 expense.description(),
-                expense.amount(),
+                decimalFormat.format(expense.amount()),
                 expense.participants()
                         .stream()
                         .map(User::getUsername)
