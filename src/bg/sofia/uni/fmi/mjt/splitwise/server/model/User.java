@@ -44,10 +44,11 @@ public class User {
 
     @Override
     public String toString() {
-        return String.format("%s%s(%s)",
+        boolean blankNames = firstName.isBlank() && lastName.isBlank();
+        return String.format("%s%s%s",
                 firstName.isBlank() ? "" : firstName + " ",
                 lastName.isBlank() ? "" : lastName + " ",
-                username);
+                blankNames ? username : "(" + username + ")");
     }
 
     public String getFullName() {
