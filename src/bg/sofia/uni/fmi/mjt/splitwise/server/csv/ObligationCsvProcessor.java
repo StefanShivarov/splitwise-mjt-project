@@ -12,7 +12,10 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -22,6 +25,8 @@ import java.util.stream.IntStream;
 
 public class ObligationCsvProcessor {
 
+    private static final DecimalFormat decimalFormat = new DecimalFormat(
+            "#.00", DecimalFormatSymbols.getInstance(Locale.US));
     private static final String OBLIGATIONS_CSV_FILE_PATH = "resources/obligations.csv";
     private final UserService userService;
 
@@ -56,8 +61,7 @@ public class ObligationCsvProcessor {
 
     public void updateObligationInCsvFile(Obligation updatedObligation) throws ObligationNotFoundException {
         try (CsvReader csvReader = new CsvReader(
-                new InputStreamReader(new FileInputStream(OBLIGATIONS_CSV_FILE_PATH)));
-             var bufferedWriter = Files.newBufferedWriter(Path.of(OBLIGATIONS_CSV_FILE_PATH))) {
+                new InputStreamReader(new FileInputStream(OBLIGATIONS_CSV_FILE_PATH)))) {
 
             List<String> csvLines = csvReader.readAllLinesRaw();
             OptionalInt lineIndex = IntStream.range(0, csvLines.size())
@@ -70,15 +74,22 @@ public class ObligationCsvProcessor {
                         "Error! Can't update obligation that is not in database!");
             }
 
-            csvLines.remove(lineIndex.getAsInt());
-            csvLines.add(parseToCsvRow(updatedObligation));
-            bufferedWriter.write("");
+            try(var bufferedWriter = Files.newBufferedWriter(Path.of(OBLIGATIONS_CSV_FILE_PATH))) {
+                csvLines.remove(lineIndex.getAsInt());
+                csvLines.add(parseToCsvRow(updatedObligation));
+                bufferedWriter.write("");
 
-            for (String line : csvLines) {
-                bufferedWriter.write(line + System.lineSeparator());
-            }
+                for (String line : csvLines) {
+                    bufferedWriter.write(line + System.lineSeparator());
+                }
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                throw new RuntimeException("Error while writing to file!", e);
+            };
+
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error while updating obligation in database!", e);
         }
     }
 
@@ -108,10 +119,10 @@ public class ObligationCsvProcessor {
     }
 
     private String parseToCsvRow(Obligation obligation) {
-        return String.format("%s,%s,%f",
-                obligation.getFirstUser(),
-                obligation.getSecondUser(),
-                obligation.getBalance());
+        return String.format("%s,%s,%s",
+                obligation.getFirstUser().getUsername(),
+                obligation.getSecondUser().getUsername(),
+                decimalFormat.format(obligation.getBalance()));
     }
 
 }
