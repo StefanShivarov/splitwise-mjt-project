@@ -11,11 +11,15 @@ public interface ObligationService {
 
     Collection<Obligation> getObligationsForUser(String username) throws UserNotFoundException;
 
+    Optional<Obligation> findObligationByUsers(String firstUsername, String secondUsername)
+            throws UserNotFoundException;
+
     Optional<Obligation> findObligationByUsers(User u1, User u2);
 
     void addObligation(User first, User second, double amount);
 
-    void updateObligation(String payerUsername, String receiverUsername, double updatedAmount) throws UserNotFoundException;
+    void updateObligation(String payerUsername, String receiverUsername, double updatedAmount)
+            throws UserNotFoundException;
 
     void updateObligation(User payer, User receiver, double paidAmount);
 

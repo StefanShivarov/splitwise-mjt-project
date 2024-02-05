@@ -44,6 +44,20 @@ public class ObligationServiceImpl implements ObligationService {
     }
 
     @Override
+    public Optional<Obligation> findObligationByUsers(String firstUsername, String secondUsername) throws UserNotFoundException {
+        Optional<User> firstUser = userService.findUserByUsername(firstUsername);
+        if (firstUser.isEmpty()) {
+            throw new UserNotFoundException("User with username " + firstUsername + " was not found!");
+        }
+        Optional<User> secondUser = userService.findUserByUsername(secondUsername);
+        if (secondUser.isEmpty()) {
+            throw new UserNotFoundException("User with username " + secondUsername + " was not found!");
+        }
+
+        return findObligationByUsers(firstUser.get(), secondUser.get());
+    }
+
+    @Override
     public Optional<Obligation> findObligationByUsers(User u1, User u2) {
         return obligations
                 .stream()
@@ -90,21 +104,20 @@ public class ObligationServiceImpl implements ObligationService {
         Optional<Obligation> obligation = findObligationByUsers(payer, receiver);
         if (obligation.isEmpty()) {
             addObligation(payer, receiver, amountPaid);
-            return;
-        }
-
-        double updatedAmount;
-        if (obligation.get().getFirstUser().equals(payer)) {
-            updatedAmount = obligation.get().getBalance() - amountPaid;
         } else {
-            updatedAmount = obligation.get().getBalance() + amountPaid;
-        }
+            double updatedAmount;
+            if (obligation.get().getFirstUser().equals(payer)) {
+                updatedAmount = obligation.get().getBalance() - amountPaid;
+            } else {
+                updatedAmount = obligation.get().getBalance() + amountPaid;
+            }
 
-        obligation.get().setBalance(updatedAmount);
-        try {
-            obligationCsvProcessor.updateObligationInCsvFile(obligation.get());
-        } catch (ObligationNotFoundException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            obligation.get().setBalance(updatedAmount);
+            try {
+                obligationCsvProcessor.updateObligationInCsvFile(obligation.get());
+            } catch (ObligationNotFoundException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
         }
     }
 
