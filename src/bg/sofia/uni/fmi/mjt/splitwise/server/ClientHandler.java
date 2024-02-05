@@ -3,6 +3,7 @@ package bg.sofia.uni.fmi.mjt.splitwise.server;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Group;
+import bg.sofia.uni.fmi.mjt.splitwise.server.model.Obligation;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
@@ -16,8 +17,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +35,8 @@ public class ClientHandler implements Runnable {
     private final GroupService groupService;
     private final ExpenseService expenseService;
     private final ObligationService obligationService;
+    private static final DecimalFormat decimalFormat = new DecimalFormat(
+            "#.00", DecimalFormatSymbols.getInstance(Locale.US));
     private static final String UNAUTHENTICATED_MESSAGE = "Please register or login to get started.";
     private static final String CLIENT_WELCOME_MESSAGE = "---------Welcome to Splitwise!---------";
 
@@ -106,10 +112,14 @@ public class ClientHandler implements Runnable {
         //TODO: make help text
     }
 
-    private void handleLogin(String[] inputTokens, PrintWriter out) {
+    private void handleLogin(String[] inputTokens, PrintWriter out) throws InvalidCommandInputException {
         if (authManager.isAuthenticated()) {
             out.println("You don't have access to this command! You are already logged in.");
             return;
+        }
+
+        if (inputTokens.length < 3) {
+            throw new InvalidCommandInputException("Invalid command! Login must be login <username> <password>!");
         }
 
         if (authManager.authenticate(inputTokens[1], inputTokens[2])) {
@@ -179,7 +189,8 @@ public class ClientHandler implements Runnable {
 
             friendListOutput.append(friends
                     .stream()
-                    .map(User::getFullName)
+                    .map(User::getUsername)
+                    .map(this::getObligationStatusWithUser)
                     .collect(Collectors.joining(System.lineSeparator())));
 
             out.println(friendListOutput);
@@ -235,10 +246,12 @@ public class ClientHandler implements Runnable {
                             System.lineSeparator() +
                             group.getMembers()
                                     .stream()
-                                    .filter(user -> !user.getUsername().equals(
+                                    .map(User::getUsername)
+                                    .filter(username -> !username.equals(
                                             authManager.getAuthenticatedUser().getUsername()))
-                                    .map(user -> "-- " + user.getUsername())
+                                    .map(this::getObligationStatusWithUser)
                                     .sorted()
+                                    .map(str -> "-- " + str)
                                     .collect(Collectors.joining(System.lineSeparator()))
                     )
                     .collect(Collectors.joining(System.lineSeparator())));
@@ -260,7 +273,7 @@ public class ClientHandler implements Runnable {
         String friendUsername = inputTokens[2];
         String description = inputTokens[3];
 
-        try{
+        try {
             if (!friendshipService.checkFriendship(
                     authManager.getAuthenticatedUser().getUsername(), friendUsername)) {
                 out.println("Error! " + friendUsername + " is not your friend!");
@@ -270,6 +283,8 @@ public class ClientHandler implements Runnable {
                     description,
                     amount,
                     Set.of(friendUsername));
+
+            out.println("You split " + decimalFormat.format(amount) + " with " + friendUsername + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }
@@ -295,6 +310,7 @@ public class ClientHandler implements Runnable {
         Set<String> usernames = group.get().getMembers()
                 .stream()
                 .map(User::getUsername)
+                .filter(username -> !username.equals(authManager.getAuthenticatedUser().getUsername()))
                 .collect(Collectors.toSet());
 
         try {
@@ -302,6 +318,8 @@ public class ClientHandler implements Runnable {
                     description,
                     amount,
                     usernames);
+
+            out.println("You split " + decimalFormat.format(amount) + " with group" + groupName + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }
@@ -315,9 +333,32 @@ public class ClientHandler implements Runnable {
             obligationService.updateObligation(payerUsername,
                     authManager.getAuthenticatedUser().getUsername(),
                     amount);
+
+            out.println(payerUsername + " payed you " + decimalFormat.format(amount) + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }
+    }
+
+    private String getObligationStatusWithUser(String username) {
+        Optional<User> otherUser = userService.findUserByUsername(username);
+
+        Optional<Obligation> obligation = obligationService
+                .findObligationByUsers(authManager.getAuthenticatedUser(), otherUser.get());
+
+        String obligationStatus = "";
+        if (obligation.isPresent()) {
+            double balance = obligation.get().getBalance();
+            boolean youOwe = (balance > 0 && obligation.get().getSecondUser().equals(otherUser.get()))
+                    || (balance < 0 && obligation.get().getFirstUser().equals(otherUser.get()));
+            if (balance != 0) {
+                obligationStatus = String.format("%s %s",
+                        youOwe ? " : You owe" : " : Owes you",
+                        decimalFormat.format(Math.abs(balance)));
+            }
+        }
+
+        return String.format("%s%s", otherUser.get(), obligationStatus);
     }
 
 }
