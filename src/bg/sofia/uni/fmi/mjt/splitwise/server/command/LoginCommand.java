@@ -23,14 +23,7 @@ public class LoginCommand implements Command {
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, AlreadyAuthenticatedException {
-        if (authManager.isAuthenticated()) {
-            throw new AlreadyAuthenticatedException(
-                    "You don't have access to this command! You are already logged in.");
-        }
-
-        if (inputTokens.length < 3) {
-            throw new InvalidCommandInputException("Invalid command! Login must be login <username> <password>!");
-        }
+        validate(inputTokens);
 
         if (authManager.authenticate(inputTokens[1], inputTokens[2])) {
             try {
@@ -49,6 +42,19 @@ public class LoginCommand implements Command {
             }
         } else {
             out.println("Invalid credentials! Login unsuccessful!");
+        }
+    }
+
+    private void validate(String[] inputTokens)
+            throws AlreadyAuthenticatedException, InvalidCommandInputException {
+        if (authManager.isAuthenticated()) {
+            throw new AlreadyAuthenticatedException(
+                    "You don't have access to this command! You are already logged in.");
+        }
+
+        if (inputTokens.length < 3) {
+            throw new InvalidCommandInputException(
+                    "Invalid command! Login must be login <username> <password>!");
         }
     }
 

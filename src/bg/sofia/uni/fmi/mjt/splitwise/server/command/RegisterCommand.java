@@ -11,8 +11,6 @@ public class RegisterCommand implements Command {
 
     private final AuthenticationManager authManager;
     private final UserService userService;
-    private static final String ALREADY_AUTHENTICATED_MESSAGE =
-            "You don't have access to this command! You are already logged in.";
 
     public RegisterCommand(AuthenticationManager authManager, UserService userService) {
         this.authManager = authManager;
@@ -22,9 +20,7 @@ public class RegisterCommand implements Command {
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, AlreadyAuthenticatedException {
-        if (authManager.isAuthenticated()) {
-            throw new AlreadyAuthenticatedException(ALREADY_AUTHENTICATED_MESSAGE);
-        }
+        validate();
 
         switch (inputTokens.length) {
             case 3 -> userService.addUser(inputTokens[1], inputTokens[2], "", "");
@@ -32,6 +28,13 @@ public class RegisterCommand implements Command {
             case 5 -> userService.addUser(inputTokens[1], inputTokens[2], inputTokens[3], inputTokens[4]);
             default -> throw new InvalidCommandInputException(
                     "Invalid user information! User can't be created!");
+        }
+    }
+
+    private void validate() throws AlreadyAuthenticatedException {
+        if (authManager.isAuthenticated()) {
+            throw new AlreadyAuthenticatedException(
+                    "You don't have access to this command! You are already logged in.");
         }
     }
 

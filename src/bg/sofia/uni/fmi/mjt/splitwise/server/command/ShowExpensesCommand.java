@@ -23,9 +23,7 @@ public class ShowExpensesCommand implements Command {
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            throw new NotAuthenticatedException();
-        }
+        validate();
 
         try {
             out.println("--- My expenses ---" + System.lineSeparator() +
@@ -37,6 +35,12 @@ public class ShowExpensesCommand implements Command {
                             .collect(Collectors.joining(System.lineSeparator())));
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
+        }
+    }
+
+    private void validate() throws NotAuthenticatedException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
         }
     }
 

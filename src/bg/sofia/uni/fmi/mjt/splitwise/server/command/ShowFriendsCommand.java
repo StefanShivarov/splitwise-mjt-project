@@ -30,9 +30,7 @@ public class ShowFriendsCommand implements Command {
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            throw new NotAuthenticatedException();
-        }
+        validate();
 
         StringBuilder friendListOutput = new StringBuilder("Friends: ")
                 .append(System.lineSeparator());
@@ -65,6 +63,12 @@ public class ShowFriendsCommand implements Command {
             out.println(friendListOutput);
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
+        }
+    }
+
+    private void validate() throws NotAuthenticatedException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
         }
     }
 

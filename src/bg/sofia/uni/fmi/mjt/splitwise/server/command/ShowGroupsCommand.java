@@ -31,9 +31,7 @@ public class ShowGroupsCommand implements Command {
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            throw new NotAuthenticatedException();
-        }
+        validate();
 
         StringBuilder groupsOutput = new StringBuilder("Groups:")
                 .append(System.lineSeparator());
@@ -80,6 +78,12 @@ public class ShowGroupsCommand implements Command {
 
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
+        }
+    }
+
+    private void validate() throws NotAuthenticatedException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
         }
     }
 

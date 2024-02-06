@@ -2,7 +2,6 @@ package bg.sofia.uni.fmi.mjt.splitwise.server.command;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.AuthenticationException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
-import bg.sofia.uni.fmi.mjt.splitwise.server.exception.NotAuthenticatedException;
 
 import java.io.PrintWriter;
 

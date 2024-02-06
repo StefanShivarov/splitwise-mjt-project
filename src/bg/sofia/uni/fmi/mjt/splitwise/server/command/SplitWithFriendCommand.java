@@ -32,14 +32,7 @@ public class SplitWithFriendCommand implements Command {
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            throw new NotAuthenticatedException();
-        }
-
-        if (inputTokens.length < 4) {
-            throw new InvalidCommandInputException("Invalid command! " +
-                    "Split command must be split <amount> <username> <desc>.");
-        }
+        validate(inputTokens);
 
         double amount = Double.parseDouble(inputTokens[1]);
         String friendUsername = inputTokens[2];
@@ -68,6 +61,18 @@ public class SplitWithFriendCommand implements Command {
                     + " with " + friendUsername + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
+        }
+    }
+
+    private void validate(String[] inputTokens)
+            throws NotAuthenticatedException, InvalidCommandInputException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
+        }
+
+        if (inputTokens.length < 4) {
+            throw new InvalidCommandInputException("Invalid command! " +
+                    "Split command must be split <amount> <username> <desc>.");
         }
     }
 

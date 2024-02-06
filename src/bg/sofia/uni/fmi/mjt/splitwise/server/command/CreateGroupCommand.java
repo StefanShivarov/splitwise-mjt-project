@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.command;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.exception.AuthenticationException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.NotAuthenticatedException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
@@ -28,15 +29,8 @@ public class CreateGroupCommand implements Command {
 
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
-            throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            throw new NotAuthenticatedException();
-        }
-
-        if (inputTokens.length < 4) {
-            throw new InvalidCommandInputException(
-                    "Invalid command! Group must have a name and at least two more members!");
-        }
+            throws InvalidCommandInputException, AuthenticationException {
+        validate(inputTokens);
 
         String groupName = inputTokens[1];
         Set<String> usernames = Arrays.stream(inputTokens)
@@ -59,6 +53,18 @@ public class CreateGroupCommand implements Command {
 
         groupService.addGroup(groupName, usernames);
         out.println("Successfully created group " + groupName + "!");
+    }
+
+    private void validate(String[] inputTokens)
+            throws InvalidCommandInputException, NotAuthenticatedException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
+        }
+
+        if (inputTokens.length < 4) {
+            throw new InvalidCommandInputException(
+                    "Invalid command! Group must have a name and at least two more members!");
+        }
     }
 
 }

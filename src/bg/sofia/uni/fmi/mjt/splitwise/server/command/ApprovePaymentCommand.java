@@ -27,14 +27,7 @@ public class ApprovePaymentCommand implements Command {
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            throw new NotAuthenticatedException();
-        }
-
-        if (inputTokens.length < 3) {
-            throw new InvalidCommandInputException("Invalid command! " +
-                    "Command must be approve-payment <amount> <username>!");
-        }
+        validate(inputTokens);
 
         double amount = Double.parseDouble(inputTokens[1]);
         String payerUsername = inputTokens[2];
@@ -54,6 +47,18 @@ public class ApprovePaymentCommand implements Command {
                     FormatterProvider.getDecimalFormat().format(amount) + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
+        }
+    }
+
+    private void validate(String[] inputTokens)
+            throws NotAuthenticatedException, InvalidCommandInputException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
+        }
+
+        if (inputTokens.length < 3) {
+            throw new InvalidCommandInputException("Invalid command! " +
+                    "Command must be approve-payment <amount> <username>!");
         }
     }
 

@@ -16,14 +16,17 @@ public class LogoutCommand implements Command {
 
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
-            throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            throw new NotAuthenticatedException();
-        }
+            throws NotAuthenticatedException {
+        validate();
 
         authManager.logout();
         out.println("Logout successful!" + System.lineSeparator() +
                 "Please register or login to get started.");
     }
 
+    private void validate() throws NotAuthenticatedException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
+        }
+    }
 }

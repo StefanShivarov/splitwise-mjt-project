@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.command;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.exception.AuthenticationException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.NotAuthenticatedException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
@@ -25,11 +26,8 @@ public class AddFriendCommand implements Command {
 
     @Override
     public void execute(String[] inputTokens, PrintWriter out)
-            throws InvalidCommandInputException, NotAuthenticatedException {
-        if (!authManager.isAuthenticated()) {
-            out.println("You don't have access to this command! You are not authenticated.");
-            throw new NotAuthenticatedException();
-        }
+            throws InvalidCommandInputException, AuthenticationException {
+        validate(inputTokens);
 
         String addFriendUsername = inputTokens[1];
         try {
@@ -44,6 +42,18 @@ public class AddFriendCommand implements Command {
             out.println("Successfully added " + addFriendUsername + " to your friend list!");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
+        }
+    }
+
+    private void validate(String[] inputTokens)
+            throws InvalidCommandInputException, NotAuthenticatedException {
+        if (!authManager.isAuthenticated()) {
+            throw new NotAuthenticatedException();
+        }
+
+        if (inputTokens.length < 2) {
+            throw new InvalidCommandInputException(
+                    "Invalid command! Command must be add-friend <username>!");
         }
     }
 
