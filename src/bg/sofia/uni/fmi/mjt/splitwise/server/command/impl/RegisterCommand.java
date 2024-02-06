@@ -1,5 +1,6 @@
-package bg.sofia.uni.fmi.mjt.splitwise.server.command;
+package bg.sofia.uni.fmi.mjt.splitwise.server.command.impl;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.Command;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.AlreadyAuthenticatedException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;

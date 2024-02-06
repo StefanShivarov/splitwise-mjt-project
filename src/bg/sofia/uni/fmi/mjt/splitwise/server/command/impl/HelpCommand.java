@@ -1,4 +1,6 @@
-package bg.sofia.uni.fmi.mjt.splitwise.server.command;
+package bg.sofia.uni.fmi.mjt.splitwise.server.command.impl;
+
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.Command;
 
 import java.io.PrintWriter;
 
