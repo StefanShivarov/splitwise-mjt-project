@@ -63,9 +63,9 @@ public class ClientHandler implements Runnable {
             Command command = commandFactory.createCommand(inputTokens[COMMAND_INDEX]);
             command.execute(inputTokens, out);
         } catch (NotAuthenticatedException e) {
-                out.println(NOT_AUTHENTICATED_MESSAGE
-                        + System.lineSeparator()
-                        + PLEASE_LOGIN_OR_REGISTER_MESSAGE);
+            out.println(NOT_AUTHENTICATED_MESSAGE
+                    + System.lineSeparator()
+                    + PLEASE_LOGIN_OR_REGISTER_MESSAGE);
         } catch (InvalidCommandInputException | AuthenticationException e) {
             out.println(e.getMessage());
         }

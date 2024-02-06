@@ -16,6 +16,9 @@ public class RegisterCommand implements Command {
     private static final int PASS_INDEX = 2;
     private static final int FIRST_NAME_INDEX = 3;
     private static final int LAST_NAME_INDEX = 4;
+    private static final int NO_FIRST_NAME = 3;
+    private static final int NO_LAST_NAME = 4;
+    private static final int FULL_NAME = 5;
 
     public RegisterCommand(AuthenticationManager authManager, UserService userService) {
         this.authManager = authManager;
@@ -28,13 +31,13 @@ public class RegisterCommand implements Command {
         validate();
 
         switch (inputTokens.length) {
-            case 3 -> userService.addUser(
+            case NO_FIRST_NAME -> userService.addUser(
                     inputTokens[USERNAME_INDEX], inputTokens[PASS_INDEX],
                     "", "");
-            case 4 -> userService.addUser(
+            case NO_LAST_NAME -> userService.addUser(
                     inputTokens[USERNAME_INDEX], inputTokens[PASS_INDEX],
                     inputTokens[FIRST_NAME_INDEX], "");
-            case 5 -> userService.addUser(
+            case FULL_NAME -> userService.addUser(
                     inputTokens[USERNAME_INDEX], inputTokens[PASS_INDEX],
                     inputTokens[FIRST_NAME_INDEX], inputTokens[LAST_NAME_INDEX]);
             default -> throw new InvalidCommandInputException(

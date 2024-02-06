@@ -23,6 +23,7 @@ public class NotificationCsvProcessor {
     private static final int USERNAME_INDEX = 1;
     private static final int TIMESTAMP_INDEX = 2;
     private static final int SEEN_INDEX = 3;
+
     public NotificationCsvProcessor() {
 
     }
@@ -58,9 +59,9 @@ public class NotificationCsvProcessor {
 
             List<String> csvLines = csvReader.readAllLinesRaw();
             updatedNotifications.forEach(updatedNotification -> {
-                    csvLines.removeIf(line ->
-                            lineMatchesNotification(line, updatedNotification));
-                    csvLines.add(parseToCsvRow(updatedNotification));
+                csvLines.removeIf(line ->
+                        lineMatchesNotification(line, updatedNotification));
+                csvLines.add(parseToCsvRow(updatedNotification));
             });
 
             try (var bufferedWriter = Files.newBufferedWriter(

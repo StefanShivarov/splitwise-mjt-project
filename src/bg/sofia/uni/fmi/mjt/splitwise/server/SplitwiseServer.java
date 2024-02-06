@@ -39,18 +39,14 @@ public class SplitwiseServer {
 
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
             Socket clientSocket;
-
             while (true) {
                 clientSocket = serverSocket.accept();
                 System.out.println("New client connected.");
                 executor.execute(new ClientHandler(clientSocket,
                         new CommandFactory(
-                                new AuthenticationManager(userService),
-                                userService,
-                                friendshipService,
-                                groupService,
-                                expenseService,
-                                obligationService,
+                                new AuthenticationManager(userService), userService,
+                                friendshipService, groupService,
+                                expenseService, obligationService,
                                 notificationService)));
             }
         } catch (IOException e) {

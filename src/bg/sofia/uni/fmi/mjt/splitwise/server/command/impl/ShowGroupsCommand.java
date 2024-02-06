@@ -46,37 +46,8 @@ public class ShowGroupsCommand implements Command {
                 return;
             }
 
-            groupsOutput.append(groups
-                    .stream()
-                    .map(group -> "* "
-                            + group.getName()
-                            + System.lineSeparator()
-                            + group.getMembers()
-                                    .stream()
-                                    .map(User::getUsername)
-                                    .filter(username -> !username.equals(
-                                            authManager.getAuthenticatedUser().getUsername()))
-                                    .map(username -> {
-                                        try {
-                                            return obligationService
-                                                    .getObligationStatusWithUserForLoggedInUser(
-                                                            authManager
-                                                                    .getAuthenticatedUser()
-                                                                    .getUsername(),
-                                                            username);
-                                        } catch (UserNotFoundException e) {
-                                            return null;
-                                        }
-                                    })
-                                    .filter(Objects::nonNull)
-                                    .sorted()
-                                    .map(str -> "-- " + str)
-                                    .collect(Collectors.joining(System.lineSeparator()))
-                    )
-                    .collect(Collectors.joining(System.lineSeparator())));
-
+            groupsOutput.append(getGroupsOutput(groups));
             out.println(groupsOutput);
-
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }
@@ -86,6 +57,37 @@ public class ShowGroupsCommand implements Command {
         if (!authManager.isAuthenticated()) {
             throw new NotAuthenticatedException();
         }
+    }
+
+    private String getGroupsOutput(Collection<Group> groups) {
+        return groups
+                .stream()
+                .map(group -> "* "
+                        + group.getName()
+                        + System.lineSeparator()
+                        + group.getMembers()
+                        .stream()
+                        .map(User::getUsername)
+                        .filter(username -> !username.equals(
+                                authManager.getAuthenticatedUser().getUsername()))
+                        .map(username -> {
+                            try {
+                                return obligationService
+                                        .getObligationStatusWithUserForLoggedInUser(
+                                                authManager
+                                                        .getAuthenticatedUser()
+                                                        .getUsername(),
+                                                username);
+                            } catch (UserNotFoundException e) {
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .sorted()
+                        .map(str -> "-- " + str)
+                        .collect(Collectors.joining(System.lineSeparator()))
+                )
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 
 }

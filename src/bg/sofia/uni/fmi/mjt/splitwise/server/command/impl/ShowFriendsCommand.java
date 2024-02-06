@@ -44,23 +44,7 @@ public class ShowFriendsCommand implements Command {
                 return;
             }
 
-            friendListOutput.append(friends
-                    .stream()
-                    .map(User::getUsername)
-                    .map(username -> {
-                        try {
-                            return obligationService
-                                    .getObligationStatusWithUserForLoggedInUser(
-                                            authManager.getAuthenticatedUser().getUsername(),
-                                            username);
-                        } catch (UserNotFoundException e) {
-                            out.println(e.getMessage());
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.joining(System.lineSeparator())));
-
+            friendListOutput.append(getFriendsOutput(friends, out));
             out.println(friendListOutput);
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
@@ -71,6 +55,25 @@ public class ShowFriendsCommand implements Command {
         if (!authManager.isAuthenticated()) {
             throw new NotAuthenticatedException();
         }
+    }
+
+    private String getFriendsOutput(Collection<User> friends, PrintWriter out) {
+        return friends
+                .stream()
+                .map(User::getUsername)
+                .map(username -> {
+                    try {
+                        return obligationService
+                                .getObligationStatusWithUserForLoggedInUser(
+                                        authManager.getAuthenticatedUser().getUsername(),
+                                        username);
+                    } catch (UserNotFoundException e) {
+                        out.println(e.getMessage());
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 
 }

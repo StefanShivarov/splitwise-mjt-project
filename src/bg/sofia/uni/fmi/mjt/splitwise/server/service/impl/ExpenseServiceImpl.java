@@ -45,18 +45,15 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public void addExpense(String payerUsername,
-                           String description,
-                           double amount,
-                           Set<String> participantsUsernames)
+    public void addExpense(String payerUsername, String description,
+                           double amount, Set<String> participantsUsernames)
             throws UserNotFoundException {
-        if (payerUsername == null || description == null
-                || participantsUsernames == null || payerUsername.isBlank()
-                || description.isBlank() || participantsUsernames.isEmpty()) {
+        if (payerUsername == null || description == null || participantsUsernames == null
+                || payerUsername.isBlank() || description.isBlank()
+                || participantsUsernames.isEmpty()) {
             throw new IllegalArgumentException("Invalid data!"
                     + " Can't add expense to database!");
         }
-
         Optional<User> payer = userService.findUserByUsername(payerUsername);
         if (payer.isEmpty()) {
             throw new UserNotFoundException("User with username " + payerUsername
@@ -75,9 +72,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         Expense expense = new Expense(payer.get(), description, amount, participants);
         expenseCsvProcessor.writeExpenseToCsvFile(expense);
-
         double amountPerUser = amount / (participants.size() + 1);
-
         participants.forEach(participant ->
                 obligationService.updateObligation(payer.get(), participant, amountPerUser));
     }

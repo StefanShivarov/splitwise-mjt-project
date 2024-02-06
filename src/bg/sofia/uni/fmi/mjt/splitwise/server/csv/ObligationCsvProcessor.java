@@ -29,7 +29,6 @@ public class ObligationCsvProcessor {
     private static final int SECOND_USERNAME_INDEX = 1;
     private static final int BALANCE_INDEX = 2;
 
-
     public ObligationCsvProcessor(UserService userService) {
         this.userService = userService;
     }
@@ -63,30 +62,25 @@ public class ObligationCsvProcessor {
             throws ObligationNotFoundException {
         try (CsvReader csvReader = new CsvReader(
                 new InputStreamReader(new FileInputStream(OBLIGATIONS_CSV_FILE_PATH)))) {
-
             List<String> csvLines = csvReader.readAllLinesRaw();
             OptionalInt lineIndex = IntStream.range(0, csvLines.size())
                     .filter(index ->
-                            lineMatchesObligationUsernames(csvLines.get(index),
-                                    updatedObligation))
+                            lineMatchesObligationUsernames(csvLines.get(index), updatedObligation))
                     .findFirst();
 
             if (lineIndex.isEmpty()) {
                 throw new ObligationNotFoundException(
                         "Error! Can't update obligation that is not in database!");
             }
-
             csvLines.remove(lineIndex.getAsInt());
             csvLines.add(parseToCsvRow(updatedObligation));
 
             try (var bufferedWriter = Files.newBufferedWriter(
                     Path.of(OBLIGATIONS_CSV_FILE_PATH))) {
                 bufferedWriter.write("");
-
                 for (String line : csvLines) {
                     bufferedWriter.write(line + System.lineSeparator());
                 }
-
                 bufferedWriter.flush();
             } catch (IOException e) {
                 throw new RuntimeException("Error while writing to file!", e);

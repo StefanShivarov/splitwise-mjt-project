@@ -42,7 +42,6 @@ public class SplitWithGroupCommand implements Command {
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, NotAuthenticatedException {
         validate(inputTokens);
-
         double amount = Double.parseDouble(inputTokens[AMOUNT_INDEX]);
         String groupName = inputTokens[GROUP_NAME_INDEX];
         String description = inputTokens[DESC_INDEX];
@@ -53,28 +52,14 @@ public class SplitWithGroupCommand implements Command {
             return;
         }
 
-        Set<String> usernames = group.get().getMembers()
-                .stream()
-                .map(User::getUsername)
-                .filter(username -> !username.equals(
-                        authManager.getAuthenticatedUser().getUsername()))
-                .collect(Collectors.toSet());
-
+        Set<String> usernames = getMembersUsernames(group.get());
         try {
             expenseService.addExpense(authManager.getAuthenticatedUser().getUsername(),
                     description,
                     amount,
                     usernames);
 
-            notificationService.addNotification(
-                    String.format("%s paid %s (%s each) for group %s [%s].",
-                            authManager.getAuthenticatedUser().getFullName(),
-                            FormatterProvider.getDecimalFormat().format(amount),
-                            FormatterProvider.getDecimalFormat()
-                                    .format(amount / (usernames.size() + 1)),
-                            groupName,
-                            description),
-                    usernames);
+            sendNotifications(groupName, description, amount, usernames);
 
             out.println("You split " + FormatterProvider.getDecimalFormat().format(amount)
                     + " with group" + groupName + ".");
@@ -93,6 +78,29 @@ public class SplitWithGroupCommand implements Command {
             throw new InvalidCommandInputException("Invalid command! "
                     + "Split command must be split-group <amount> <group_name> <desc>.");
         }
+    }
+
+    private void sendNotifications(String groupName,
+                                   String description,
+                                   double amount, Set<String> usernames)
+            throws UserNotFoundException {
+        notificationService.addNotification(
+                String.format("%s paid %s (%s each) for group %s [%s].",
+                        authManager.getAuthenticatedUser().getFullName(),
+                        FormatterProvider.getDecimalFormat().format(amount),
+                        FormatterProvider.getDecimalFormat()
+                                .format(amount / (usernames.size() + 1)),
+                        groupName,
+                        description), usernames);
+    }
+
+    private Set<String> getMembersUsernames(Group group) {
+        return group.getMembers()
+                .stream()
+                .map(User::getUsername)
+                .filter(username -> !username.equals(
+                        authManager.getAuthenticatedUser().getUsername()))
+                .collect(Collectors.toSet());
     }
 
 }

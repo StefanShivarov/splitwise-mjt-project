@@ -38,11 +38,9 @@ public class SplitWithFriendCommand implements Command {
     public void execute(String[] inputTokens, PrintWriter out)
             throws InvalidCommandInputException, NotAuthenticatedException {
         validate(inputTokens);
-
         double amount = Double.parseDouble(inputTokens[AMOUNT_INDEX]);
         String friendUsername = inputTokens[USERNAME_INDEX];
         String description = inputTokens[DESC_INDEX];
-
         try {
             if (!friendshipService.checkFriendship(
                     authManager.getAuthenticatedUser().getUsername(), friendUsername)) {
@@ -59,8 +57,7 @@ public class SplitWithFriendCommand implements Command {
                             authManager.getAuthenticatedUser().getFullName(),
                             FormatterProvider.getDecimalFormat().format(amount),
                             FormatterProvider.getDecimalFormat().format(amount / 2),
-                            description),
-                    friendUsername);
+                            description), friendUsername);
 
             out.println("You split " + FormatterProvider.getDecimalFormat().format(amount)
                     + " with " + friendUsername + ".");

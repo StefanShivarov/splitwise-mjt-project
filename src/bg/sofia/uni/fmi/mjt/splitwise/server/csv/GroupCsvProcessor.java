@@ -1,6 +1,5 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.csv;
 
-import bg.sofia.uni.fmi.mjt.splitwise.server.model.Friendship;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Group;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
