@@ -1,7 +1,6 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.command.impl;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.Command;
-import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.NotAuthenticatedException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
 
@@ -21,8 +20,8 @@ public class LogoutCommand implements Command {
         validate();
 
         authManager.logout();
-        out.println("Logout successful!" + System.lineSeparator() +
-                "Please register or login to get started.");
+        out.println("Logout successful!" + System.lineSeparator()
+                + "Please register or login to get started.");
     }
 
     private void validate() throws NotAuthenticatedException {

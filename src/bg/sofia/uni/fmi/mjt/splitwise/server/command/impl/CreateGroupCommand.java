@@ -19,6 +19,8 @@ public class CreateGroupCommand implements Command {
     private final AuthenticationManager authManager;
     private final GroupService groupService;
     private final NotificationService notificationService;
+    private static final int GROUP_NAME_INDEX = 1;
+    private static final int MIN_TOKENS_AMOUNT = 4;
 
     public CreateGroupCommand(AuthenticationManager authManager,
                               GroupService groupService,
@@ -33,7 +35,7 @@ public class CreateGroupCommand implements Command {
             throws InvalidCommandInputException, AuthenticationException {
         validate(inputTokens);
 
-        String groupName = inputTokens[1];
+        String groupName = inputTokens[GROUP_NAME_INDEX];
         Set<String> usernames = Arrays.stream(inputTokens)
                 .skip(2)
                 .collect(Collectors.toSet());
@@ -43,8 +45,8 @@ public class CreateGroupCommand implements Command {
             for (String username : usernames) {
                 if (!username.equals(authManager.getAuthenticatedUser().getUsername())) {
                     notificationService.addNotification(
-                            authManager.getAuthenticatedUser().getFullName() +
-                                    "added you to group" + groupName + ".",
+                            authManager.getAuthenticatedUser().getFullName()
+                                    + "added you to group" + groupName + ".",
                             username);
                 }
             }
@@ -62,7 +64,7 @@ public class CreateGroupCommand implements Command {
             throw new NotAuthenticatedException();
         }
 
-        if (inputTokens.length < 4) {
+        if (inputTokens.length < MIN_TOKENS_AMOUNT) {
             throw new InvalidCommandInputException(
                     "Invalid command! Group must have a name and at least two more members!");
         }

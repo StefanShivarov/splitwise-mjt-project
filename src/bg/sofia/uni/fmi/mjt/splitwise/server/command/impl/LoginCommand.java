@@ -15,8 +15,12 @@ public class LoginCommand implements Command {
 
     private final AuthenticationManager authManager;
     private final NotificationService notificationService;
+    private static final int USERNAME_INDEX = 1;
+    private static final int PASS_INDEX = 2;
+    private static final int MIN_TOKENS_AMOUNT = 3;
 
-    public LoginCommand(AuthenticationManager authManager, NotificationService notificationService) {
+    public LoginCommand(AuthenticationManager authManager,
+                        NotificationService notificationService) {
         this.authManager = authManager;
         this.notificationService = notificationService;
     }
@@ -26,7 +30,7 @@ public class LoginCommand implements Command {
             throws InvalidCommandInputException, AlreadyAuthenticatedException {
         validate(inputTokens);
 
-        if (authManager.authenticate(inputTokens[1], inputTokens[2])) {
+        if (authManager.authenticate(inputTokens[USERNAME_INDEX], inputTokens[PASS_INDEX])) {
             try {
                 Collection<Notification> notifications = notificationService
                         .getUnseenNotificationsForUser(
@@ -53,7 +57,7 @@ public class LoginCommand implements Command {
                     "You don't have access to this command! You are already logged in.");
         }
 
-        if (inputTokens.length < 3) {
+        if (inputTokens.length < MIN_TOKENS_AMOUNT) {
             throw new InvalidCommandInputException(
                     "Invalid command! Login must be login <username> <password>!");
         }

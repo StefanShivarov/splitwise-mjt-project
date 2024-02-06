@@ -17,14 +17,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SplitWIthGroupCommand implements Command {
+public class SplitWithGroupCommand implements Command {
 
     private final AuthenticationManager authManager;
     private final GroupService groupService;
     private final ExpenseService expenseService;
     private final NotificationService notificationService;
+    private static final int MIN_TOKENS_AMOUNT = 4;
+    private static final int AMOUNT_INDEX = 1;
+    private static final int GROUP_NAME_INDEX = 2;
+    private static final int DESC_INDEX = 3;
 
-    public SplitWIthGroupCommand(AuthenticationManager authManager,
+    public SplitWithGroupCommand(AuthenticationManager authManager,
                                  GroupService groupService,
                                  ExpenseService expenseService,
                                  NotificationService notificationService) {
@@ -39,9 +43,9 @@ public class SplitWIthGroupCommand implements Command {
             throws InvalidCommandInputException, NotAuthenticatedException {
         validate(inputTokens);
 
-        double amount = Double.parseDouble(inputTokens[1]);
-        String groupName = inputTokens[2];
-        String description = inputTokens[3];
+        double amount = Double.parseDouble(inputTokens[AMOUNT_INDEX]);
+        String groupName = inputTokens[GROUP_NAME_INDEX];
+        String description = inputTokens[DESC_INDEX];
 
         Optional<Group> group = groupService.findGroupByName(groupName);
         if (group.isEmpty()) {
@@ -52,7 +56,8 @@ public class SplitWIthGroupCommand implements Command {
         Set<String> usernames = group.get().getMembers()
                 .stream()
                 .map(User::getUsername)
-                .filter(username -> !username.equals(authManager.getAuthenticatedUser().getUsername()))
+                .filter(username -> !username.equals(
+                        authManager.getAuthenticatedUser().getUsername()))
                 .collect(Collectors.toSet());
 
         try {
@@ -71,8 +76,8 @@ public class SplitWIthGroupCommand implements Command {
                             description),
                     usernames);
 
-            out.println("You split " + FormatterProvider.getDecimalFormat().format(amount) +
-                    " with group" + groupName + ".");
+            out.println("You split " + FormatterProvider.getDecimalFormat().format(amount)
+                    + " with group" + groupName + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }
@@ -84,9 +89,9 @@ public class SplitWIthGroupCommand implements Command {
             throw new NotAuthenticatedException();
         }
 
-        if (inputTokens.length < 4) {
-            throw new InvalidCommandInputException("Invalid command! " +
-                    "Split command must be split-group <amount> <group_name> <desc>.");
+        if (inputTokens.length < MIN_TOKENS_AMOUNT) {
+            throw new InvalidCommandInputException("Invalid command! "
+                    + "Split command must be split-group <amount> <group_name> <desc>.");
         }
     }
 

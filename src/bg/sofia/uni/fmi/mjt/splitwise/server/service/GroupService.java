@@ -9,7 +9,8 @@ import java.util.Set;
 
 public interface GroupService {
 
-    Collection<Group> getGroupsForUser(String username) throws UserNotFoundException;
+    Collection<Group> getGroupsForUser(String username)
+            throws UserNotFoundException;
 
     void addGroup(String name, Set<String> usernames);
 

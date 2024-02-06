@@ -19,6 +19,10 @@ public class SplitWithFriendCommand implements Command {
     private final FriendshipService friendshipService;
     private final ExpenseService expenseService;
     private final NotificationService notificationService;
+    private static final int MIN_TOKENS_AMOUNT = 4;
+    private static final int AMOUNT_INDEX = 1;
+    private static final int USERNAME_INDEX = 2;
+    private static final int DESC_INDEX = 3;
 
     public SplitWithFriendCommand(AuthenticationManager authManager,
                                   FriendshipService friendshipService,
@@ -35,9 +39,9 @@ public class SplitWithFriendCommand implements Command {
             throws InvalidCommandInputException, NotAuthenticatedException {
         validate(inputTokens);
 
-        double amount = Double.parseDouble(inputTokens[1]);
-        String friendUsername = inputTokens[2];
-        String description = inputTokens[3];
+        double amount = Double.parseDouble(inputTokens[AMOUNT_INDEX]);
+        String friendUsername = inputTokens[USERNAME_INDEX];
+        String description = inputTokens[DESC_INDEX];
 
         try {
             if (!friendshipService.checkFriendship(
@@ -71,9 +75,9 @@ public class SplitWithFriendCommand implements Command {
             throw new NotAuthenticatedException();
         }
 
-        if (inputTokens.length < 4) {
-            throw new InvalidCommandInputException("Invalid command! " +
-                    "Split command must be split <amount> <username> <desc>.");
+        if (inputTokens.length < MIN_TOKENS_AMOUNT) {
+            throw new InvalidCommandInputException("Invalid command! "
+                    + "Split command must be split <amount> <username> <desc>.");
         }
     }
 

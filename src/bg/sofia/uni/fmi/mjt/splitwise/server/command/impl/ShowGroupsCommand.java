@@ -48,10 +48,10 @@ public class ShowGroupsCommand implements Command {
 
             groupsOutput.append(groups
                     .stream()
-                    .map(group -> "* " +
-                            group.getName() +
-                            System.lineSeparator() +
-                            group.getMembers()
+                    .map(group -> "* "
+                            + group.getName()
+                            + System.lineSeparator()
+                            + group.getMembers()
                                     .stream()
                                     .map(User::getUsername)
                                     .filter(username -> !username.equals(

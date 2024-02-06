@@ -24,7 +24,10 @@ public class Notification {
         this.seen = false;
     }
 
-    public Notification(String message, String recipientUsername, LocalDateTime timestamp, boolean seen) {
+    public Notification(String message,
+                        String recipientUsername,
+                        LocalDateTime timestamp,
+                        boolean seen) {
         this.message = message;
         this.recipientUsername = recipientUsername;
         this.timestamp = timestamp;

@@ -7,16 +7,20 @@ import java.util.Collection;
 
 public interface NotificationService {
 
-    Collection<Notification> getAllNotificationsForUser(String username) throws UserNotFoundException;
+    Collection<Notification> getAllNotificationsForUser(String username)
+            throws UserNotFoundException;
 
-    Collection<Notification> getUnseenNotificationsForUser(String username) throws UserNotFoundException;
+    Collection<Notification> getUnseenNotificationsForUser(String username)
+            throws UserNotFoundException;
 
     String getNotificationsOutput(Collection<Notification> notifications);
 
     void markNotificationsAsSeen(Collection<Notification> notifications);
 
-    void addNotification(String message, String recipientUsername) throws UserNotFoundException;
+    void addNotification(String message, String recipientUsername)
+            throws UserNotFoundException;
 
-    void addNotification(String message, Collection<String> recipientsUsernames) throws UserNotFoundException;
+    void addNotification(String message, Collection<String> recipientsUsernames)
+            throws UserNotFoundException;
 
 }

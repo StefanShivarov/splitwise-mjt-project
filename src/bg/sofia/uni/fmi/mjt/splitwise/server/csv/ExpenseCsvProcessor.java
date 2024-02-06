@@ -23,6 +23,11 @@ public class ExpenseCsvProcessor {
 
     private static final String EXPENSES_CSV_FILE_PATH = "resources/expenses.csv";
     private final UserService userService;
+    private static final int MIN_TOKENS_AMOUNT = 4;
+    private static final int SKIP_TO_USERNAMES = 3;
+    private static final int AMOUNT_INDEX = 2;
+    private static final int DESC_INDEX = 1;
+    private static final int USERNAME_INDEX = 0;
 
     public ExpenseCsvProcessor(UserService userService) {
         this.userService = userService;
@@ -54,12 +59,12 @@ public class ExpenseCsvProcessor {
     }
 
     private Expense parseFromCsvRow(String[] stringTokens) {
-        if (stringTokens.length < 4) {
+        if (stringTokens.length < MIN_TOKENS_AMOUNT) {
             return null;
         }
 
-        String payerUsername = stringTokens[0];
-        String desc = stringTokens[1];
+        String payerUsername = stringTokens[USERNAME_INDEX];
+        String desc = stringTokens[DESC_INDEX];
 
         if (payerUsername == null || desc == null
                 || payerUsername.isBlank() || desc.isBlank()) {
@@ -71,9 +76,9 @@ public class ExpenseCsvProcessor {
             return null;
         }
 
-        double amount = Double.parseDouble(stringTokens[2]);
+        double amount = Double.parseDouble(stringTokens[AMOUNT_INDEX]);
         Set<User> participants = Arrays.stream(stringTokens)
-                .skip(3)
+                .skip(SKIP_TO_USERNAMES)
                 .map(userService::findUserByUsername)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

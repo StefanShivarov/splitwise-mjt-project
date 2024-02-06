@@ -1,8 +1,8 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.command.factory;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.Command;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.AddFriendCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ApprovePaymentCommand;
-import bg.sofia.uni.fmi.mjt.splitwise.server.command.Command;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.CreateGroupCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.HelpCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.LoginCommand;
@@ -11,7 +11,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.RegisterCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowExpensesCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowFriendsCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowGroupsCommand;
-import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWIthGroupCommand;
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithGroupCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithFriendCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
@@ -54,13 +54,16 @@ public class CommandFactory {
             case "login" -> new LoginCommand(authManager, notificationService);
             case "logout" -> new LogoutCommand(authManager);
             case "register" -> new RegisterCommand(authManager, userService);
-            case "add-friend" -> new AddFriendCommand(authManager, friendshipService, notificationService);
-            case "my-friends" -> new ShowFriendsCommand(authManager, friendshipService, obligationService);
-            case "create-group" -> new CreateGroupCommand(authManager, groupService, notificationService);
+            case "add-friend" -> new AddFriendCommand(authManager, friendshipService,
+                    notificationService);
+            case "my-friends" -> new ShowFriendsCommand(authManager, friendshipService,
+                    obligationService);
+            case "create-group" -> new CreateGroupCommand(authManager, groupService,
+                    notificationService);
             case "my-groups" -> new ShowGroupsCommand(authManager, groupService, obligationService);
             case "split" -> new SplitWithFriendCommand(authManager, friendshipService,
                     expenseService, notificationService);
-            case "split-group" -> new SplitWIthGroupCommand(authManager, groupService,
+            case "split-group" -> new SplitWithGroupCommand(authManager, groupService,
                     expenseService, notificationService);
             case "approve-payment" -> new ApprovePaymentCommand(authManager, obligationService,
                     notificationService);

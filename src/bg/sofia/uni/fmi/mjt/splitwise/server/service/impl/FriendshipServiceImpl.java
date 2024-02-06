@@ -50,20 +50,24 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public void addFriendship(String firstUsername, String secondUsername) throws UserNotFoundException {
+    public void addFriendship(String firstUsername, String secondUsername)
+            throws UserNotFoundException {
         if (firstUsername == null || firstUsername.isBlank()
                 || secondUsername == null || secondUsername.isBlank()) {
-            throw new IllegalArgumentException("Invalid arguments! Username is null or blank!");
+            throw new IllegalArgumentException("Invalid arguments!"
+                    + " Username is null or blank!");
         }
 
         Optional<User> firstUser = userService.findUserByUsername(firstUsername);
         Optional<User> secondUser = userService.findUserByUsername(secondUsername);
 
         if (firstUser.isEmpty()) {
-            throw new UserNotFoundException("User with username " + firstUsername + " was not found!");
+            throw new UserNotFoundException("User with username "
+                    + firstUsername + " was not found!");
         }
         if (secondUser.isEmpty()) {
-            throw new UserNotFoundException("User with username " + firstUsername + " was not found!");
+            throw new UserNotFoundException("User with username "
+                    + firstUsername + " was not found!");
         }
 
         Friendship friendship = new Friendship(firstUser.get(), secondUser.get());
@@ -72,7 +76,8 @@ public class FriendshipServiceImpl implements FriendshipService {
     }
 
     @Override
-    public boolean checkFriendship(String firstUsername, String secondUsername) throws UserNotFoundException {
+    public boolean checkFriendship(String firstUsername, String secondUsername)
+            throws UserNotFoundException {
         return getFriendsForUser(firstUsername)
                 .stream()
                 .anyMatch(user -> user.getUsername().equals(secondUsername));

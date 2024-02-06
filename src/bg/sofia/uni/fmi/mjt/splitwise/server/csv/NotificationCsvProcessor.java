@@ -19,7 +19,10 @@ import java.util.stream.Collectors;
 public class NotificationCsvProcessor {
 
     private static final String NOTIFICATIONS_CSV_FILE_PATH = "resources/notifications.csv";
-
+    private static final int MESSAGE_INDEX = 0;
+    private static final int USERNAME_INDEX = 1;
+    private static final int TIMESTAMP_INDEX = 2;
+    private static final int SEEN_INDEX = 3;
     public NotificationCsvProcessor() {
 
     }
@@ -55,11 +58,13 @@ public class NotificationCsvProcessor {
 
             List<String> csvLines = csvReader.readAllLinesRaw();
             updatedNotifications.forEach(updatedNotification -> {
-                    csvLines.removeIf(line -> lineMatchesNotification(line, updatedNotification));
+                    csvLines.removeIf(line ->
+                            lineMatchesNotification(line, updatedNotification));
                     csvLines.add(parseToCsvRow(updatedNotification));
             });
 
-            try(var bufferedWriter = Files.newBufferedWriter(Path.of(NOTIFICATIONS_CSV_FILE_PATH))) {
+            try (var bufferedWriter = Files.newBufferedWriter(
+                    Path.of(NOTIFICATIONS_CSV_FILE_PATH))) {
                 bufferedWriter.write("");
 
                 for (String line : csvLines) {
@@ -76,24 +81,24 @@ public class NotificationCsvProcessor {
     }
 
     private boolean lineMatchesNotification(String csvLine, Notification notification) {
-        return csvLine.startsWith(notification.getMessage() +
-                "," +
-                notification.getRecipientUsername() +
-                "," +
-                notification.getTimestamp().format(FormatterProvider.getDateTimeFormatter()));
+        return csvLine.startsWith(notification.getMessage()
+                + ","
+                + notification.getRecipientUsername()
+                + ","
+                + notification.getTimestamp().format(FormatterProvider.getDateTimeFormatter()));
     }
 
     private Notification parseFromCsvRow(String[] stringTokens) {
-        String message = stringTokens[0];
-        String username = stringTokens[1];
+        String message = stringTokens[MESSAGE_INDEX];
+        String username = stringTokens[USERNAME_INDEX];
         if (message == null || username == null
                 || message.isBlank() || username.isBlank()) {
             return null;
         }
 
-        LocalDateTime timestamp = LocalDateTime.parse(stringTokens[2],
+        LocalDateTime timestamp = LocalDateTime.parse(stringTokens[TIMESTAMP_INDEX],
                 FormatterProvider.getDateTimeFormatter());
-        boolean isSeen = Boolean.parseBoolean(stringTokens[3]);
+        boolean isSeen = Boolean.parseBoolean(stringTokens[SEEN_INDEX]);
 
         return new Notification(message, username, timestamp, isSeen);
     }

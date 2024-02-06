@@ -25,6 +25,10 @@ public class ObligationCsvProcessor {
 
     private static final String OBLIGATIONS_CSV_FILE_PATH = "resources/obligations.csv";
     private final UserService userService;
+    private static final int FIRST_USERNAME_INDEX = 0;
+    private static final int SECOND_USERNAME_INDEX = 1;
+    private static final int BALANCE_INDEX = 2;
+
 
     public ObligationCsvProcessor(UserService userService) {
         this.userService = userService;
@@ -55,14 +59,16 @@ public class ObligationCsvProcessor {
         }
     }
 
-    public void updateObligationInCsvFile(Obligation updatedObligation) throws ObligationNotFoundException {
+    public void updateObligationInCsvFile(Obligation updatedObligation)
+            throws ObligationNotFoundException {
         try (CsvReader csvReader = new CsvReader(
                 new InputStreamReader(new FileInputStream(OBLIGATIONS_CSV_FILE_PATH)))) {
 
             List<String> csvLines = csvReader.readAllLinesRaw();
             OptionalInt lineIndex = IntStream.range(0, csvLines.size())
                     .filter(index ->
-                            lineMatchesObligationUsernames(csvLines.get(index), updatedObligation))
+                            lineMatchesObligationUsernames(csvLines.get(index),
+                                    updatedObligation))
                     .findFirst();
 
             if (lineIndex.isEmpty()) {
@@ -73,7 +79,8 @@ public class ObligationCsvProcessor {
             csvLines.remove(lineIndex.getAsInt());
             csvLines.add(parseToCsvRow(updatedObligation));
 
-            try(var bufferedWriter = Files.newBufferedWriter(Path.of(OBLIGATIONS_CSV_FILE_PATH))) {
+            try (var bufferedWriter = Files.newBufferedWriter(
+                    Path.of(OBLIGATIONS_CSV_FILE_PATH))) {
                 bufferedWriter.write("");
 
                 for (String line : csvLines) {
@@ -90,14 +97,14 @@ public class ObligationCsvProcessor {
     }
 
     private boolean lineMatchesObligationUsernames(String csvLine, Obligation obligation) {
-        return csvLine.startsWith(obligation.getFirstUser().getUsername() +
-                "," +
-                obligation.getSecondUser().getUsername());
+        return csvLine.startsWith(obligation.getFirstUser().getUsername()
+                + ","
+                + obligation.getSecondUser().getUsername());
     }
 
     private Obligation parseFromCsvRow(String[] stringTokens) {
-        String firstUsername = stringTokens[0];
-        String secondUsername = stringTokens[1];
+        String firstUsername = stringTokens[FIRST_USERNAME_INDEX];
+        String secondUsername = stringTokens[SECOND_USERNAME_INDEX];
         if (firstUsername == null || secondUsername == null
                 || firstUsername.isBlank() || secondUsername.isBlank()) {
             return null;
@@ -109,7 +116,7 @@ public class ObligationCsvProcessor {
             return null;
         }
 
-        double balance = Double.parseDouble(stringTokens[2]);
+        double balance = Double.parseDouble(stringTokens[BALANCE_INDEX]);
 
         return new Obligation(firstUser.get(), secondUser.get(), balance);
     }

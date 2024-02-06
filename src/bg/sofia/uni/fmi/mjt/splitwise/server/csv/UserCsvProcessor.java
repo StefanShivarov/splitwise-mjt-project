@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 public class UserCsvProcessor {
 
     private static final String USERS_CSV_FILE_PATH = "resources/users.csv";
+    private static final int START_INDEX = 0;
+    private static final int FIRST_NAME_INDEX = 2;
+    private static final int LAST_NAME_INDEX = 3;
 
     public Set<User> loadUsersFromCsvFile() {
         try (CsvReader csvReader = new CsvReader(
@@ -42,13 +45,13 @@ public class UserCsvProcessor {
     }
 
     private User parseFromCsvRow(String[] rowTokens) {
-        int index = 0;
+        int index = START_INDEX;
         User user = new User(rowTokens[index++], rowTokens[index++]);
 
-        if (rowTokens.length > 2) {
+        if (rowTokens.length > FIRST_NAME_INDEX) {
             user.setFirstName(rowTokens[index++]);
         }
-        if (rowTokens.length > 3) {
+        if (rowTokens.length > LAST_NAME_INDEX) {
             user.setLastName(rowTokens[index]);
         }
 

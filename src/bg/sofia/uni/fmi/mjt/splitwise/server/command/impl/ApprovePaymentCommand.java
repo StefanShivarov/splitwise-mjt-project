@@ -16,6 +16,9 @@ public class ApprovePaymentCommand implements Command {
     private final AuthenticationManager authManager;
     private final ObligationService obligationService;
     private final NotificationService notificationService;
+    private static final int MIN_TOKENS_AMOUNT = 3;
+    private static final int AMOUNT_INDEX = 1;
+    private static final int USERNAME_INDEX = 2;
 
     public ApprovePaymentCommand(AuthenticationManager authManager,
                                  ObligationService obligationService,
@@ -30,8 +33,8 @@ public class ApprovePaymentCommand implements Command {
             throws InvalidCommandInputException, NotAuthenticatedException {
         validate(inputTokens);
 
-        double amount = Double.parseDouble(inputTokens[1]);
-        String payerUsername = inputTokens[2];
+        double amount = Double.parseDouble(inputTokens[AMOUNT_INDEX]);
+        String payerUsername = inputTokens[USERNAME_INDEX];
 
         try {
             obligationService.updateObligation(payerUsername,
@@ -44,8 +47,8 @@ public class ApprovePaymentCommand implements Command {
                             FormatterProvider.getDecimalFormat().format(amount)),
                     payerUsername);
 
-            out.println(payerUsername + " payed you " +
-                    FormatterProvider.getDecimalFormat().format(amount) + ".");
+            out.println(payerUsername + " payed you "
+                    + FormatterProvider.getDecimalFormat().format(amount) + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }
@@ -57,9 +60,9 @@ public class ApprovePaymentCommand implements Command {
             throw new NotAuthenticatedException();
         }
 
-        if (inputTokens.length < 3) {
-            throw new InvalidCommandInputException("Invalid command! " +
-                    "Command must be approve-payment <amount> <username>!");
+        if (inputTokens.length < MIN_TOKENS_AMOUNT) {
+            throw new InvalidCommandInputException("Invalid command! "
+                    + "Command must be approve-payment <amount> <username>!");
         }
     }
 

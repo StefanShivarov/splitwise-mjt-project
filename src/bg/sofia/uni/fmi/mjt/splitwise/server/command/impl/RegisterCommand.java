@@ -12,6 +12,10 @@ public class RegisterCommand implements Command {
 
     private final AuthenticationManager authManager;
     private final UserService userService;
+    private static final int USERNAME_INDEX = 1;
+    private static final int PASS_INDEX = 2;
+    private static final int FIRST_NAME_INDEX = 3;
+    private static final int LAST_NAME_INDEX = 4;
 
     public RegisterCommand(AuthenticationManager authManager, UserService userService) {
         this.authManager = authManager;
@@ -24,9 +28,15 @@ public class RegisterCommand implements Command {
         validate();
 
         switch (inputTokens.length) {
-            case 3 -> userService.addUser(inputTokens[1], inputTokens[2], "", "");
-            case 4 -> userService.addUser(inputTokens[1], inputTokens[2], inputTokens[3], "");
-            case 5 -> userService.addUser(inputTokens[1], inputTokens[2], inputTokens[3], inputTokens[4]);
+            case 3 -> userService.addUser(
+                    inputTokens[USERNAME_INDEX], inputTokens[PASS_INDEX],
+                    "", "");
+            case 4 -> userService.addUser(
+                    inputTokens[USERNAME_INDEX], inputTokens[PASS_INDEX],
+                    inputTokens[FIRST_NAME_INDEX], "");
+            case 5 -> userService.addUser(
+                    inputTokens[USERNAME_INDEX], inputTokens[PASS_INDEX],
+                    inputTokens[FIRST_NAME_INDEX], inputTokens[LAST_NAME_INDEX]);
             default -> throw new InvalidCommandInputException(
                     "Invalid user information! User can't be created!");
         }

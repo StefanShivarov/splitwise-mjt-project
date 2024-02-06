@@ -27,8 +27,8 @@ public class ShowExpensesCommand implements Command {
         validate();
 
         try {
-            out.println("--- My expenses ---" + System.lineSeparator() +
-                    expenseService
+            out.println("--- My expenses ---" + System.lineSeparator()
+                    + expenseService
                             .getExpensesPaidByUser(
                                     authManager.getAuthenticatedUser().getUsername())
                             .stream()

@@ -16,6 +16,8 @@ public class AddFriendCommand implements Command {
     private final AuthenticationManager authManager;
     private final FriendshipService friendshipService;
     private final NotificationService notificationService;
+    private static final int USERNAME_INDEX = 1;
+    private static final int MIN_TOKENS_AMOUNT = 2;
 
     public AddFriendCommand(AuthenticationManager authManager,
                             FriendshipService friendshipService,
@@ -30,14 +32,14 @@ public class AddFriendCommand implements Command {
             throws InvalidCommandInputException, AuthenticationException {
         validate(inputTokens);
 
-        String addFriendUsername = inputTokens[1];
+        String addFriendUsername = inputTokens[USERNAME_INDEX];
         try {
             friendshipService.addFriendship(authManager.getAuthenticatedUser().getUsername(),
                     addFriendUsername);
 
             notificationService.addNotification(
-                    authManager.getAuthenticatedUser().getFullName() +
-                            " added you as a friend!",
+                    authManager.getAuthenticatedUser().getFullName()
+                            + " added you as a friend!",
                     addFriendUsername);
 
             out.println("Successfully added " + addFriendUsername + " to your friend list!");
@@ -52,7 +54,7 @@ public class AddFriendCommand implements Command {
             throw new NotAuthenticatedException();
         }
 
-        if (inputTokens.length < 2) {
+        if (inputTokens.length < MIN_TOKENS_AMOUNT) {
             throw new InvalidCommandInputException(
                     "Invalid command! Command must be add-friend <username>!");
         }

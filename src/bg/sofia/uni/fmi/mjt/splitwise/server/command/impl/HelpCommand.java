@@ -8,24 +8,36 @@ public class HelpCommand implements Command {
 
     @Override
     public void execute(String[] inputTokens, PrintWriter out) {
-        out.println("--- Help ---" +
-                System.lineSeparator() +
-                "--disconnect" +
-                "* Not authenticated: " + System.lineSeparator() +
-                "-- login <username> <password>" + System.lineSeparator() +
-                "-- register <username> <password> <first_name?> <last_name?>" +
-                System.lineSeparator() +
-                "* Authenticated: " + System.lineSeparator() +
-                "-- logout" + System.lineSeparator() +
-                "-- add-friend <username>" + System.lineSeparator() +
-                "-- create-group <group_name> <username> <username> <username?> ..." +
-                System.lineSeparator() +
-                "-- my-friends" + System.lineSeparator() +
-                "-- my-groups" + System.lineSeparator() +
-                "-- my-expenses " + System.lineSeparator() +
-                "-- split <amount> <username> <description>" + System.lineSeparator() +
-                "-- split-group <amount> <group_name>" + System.lineSeparator() +
-                "-- approve-payment <amount> <username>");
+        out.println(new StringBuilder()
+                .append("--- Help ---")
+                .append(System.lineSeparator())
+                .append("--disconnect")
+                .append("* Not authenticated: ")
+                .append(System.lineSeparator())
+                .append("-- login <username> <password>")
+                .append(System.lineSeparator())
+                .append("-- register <username> <password> <first_name?> <last_name?>")
+                .append(System.lineSeparator())
+                .append("* Authenticated: ")
+                .append(System.lineSeparator())
+                .append("-- logout")
+                .append(System.lineSeparator())
+                .append("-- add-friend <username>")
+                .append(System.lineSeparator())
+                .append("-- create-group <group_name> <username> <username> <username?> ...")
+                .append(System.lineSeparator())
+                .append("-- my-friends")
+                .append(System.lineSeparator())
+                .append("-- my-groups")
+                .append(System.lineSeparator())
+                .append("-- my-expenses ")
+                .append(System.lineSeparator())
+                .append("-- split <amount> <username> <description>")
+                .append(System.lineSeparator())
+                .append("-- split-group <amount> <group_name>")
+                .append(System.lineSeparator())
+                .append("-- approve-payment <amount> <username>")
+                .toString());
     }
 
 }

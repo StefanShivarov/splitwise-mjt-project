@@ -22,6 +22,8 @@ public class GroupCsvProcessor {
 
     private static final String GROUPS_CSV_FILE_PATH = "resources/groups.csv";
     private final UserService userService;
+    private static final int GROUP_NAME_INDEX = 0;
+    private static final int SKIP_TO_USERNAMES = 1;
 
     public GroupCsvProcessor(UserService userService) {
         this.userService = userService;
@@ -53,13 +55,13 @@ public class GroupCsvProcessor {
     }
 
     private Group parseFromCsvRow(String[] stringTokens) {
-        String groupName = stringTokens[0];
+        String groupName = stringTokens[GROUP_NAME_INDEX];
         if (groupName == null || groupName.isBlank()) {
             return null;
         }
 
         Set<User> groupParticipants = Arrays.stream(stringTokens)
-                .skip(1)
+                .skip(SKIP_TO_USERNAMES)
                 .map(userService::findUserByUsername)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

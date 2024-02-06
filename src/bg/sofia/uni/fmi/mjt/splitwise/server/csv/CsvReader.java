@@ -3,13 +3,13 @@ package bg.sofia.uni.fmi.mjt.splitwise.server.csv;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CsvReader implements AutoCloseable {
 
     private final BufferedReader reader;
+    private static final String SPLIT_REGEX = ",(?=(?:(?:[^\"]*\"){2})*[^\"]*$)";
 
     public CsvReader(Reader reader) {
         this.reader = new BufferedReader(reader);
@@ -21,7 +21,7 @@ public class CsvReader implements AutoCloseable {
         try {
             String line;
             while ((line = reader.readLine()) != null) {
-                lines.add(line.split(",(?=(?:(?:[^\"]*\"){2})*[^\"]*$)"));
+                lines.add(line.split(SPLIT_REGEX));
             }
 
             return lines;

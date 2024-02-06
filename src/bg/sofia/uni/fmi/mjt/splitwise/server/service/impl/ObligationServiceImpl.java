@@ -19,6 +19,8 @@ public class ObligationServiceImpl implements ObligationService {
     private final ObligationCsvProcessor obligationCsvProcessor;
     private final UserService userService;
     private final Set<Obligation> obligations;
+    private static final int BALANCE_ZERO = 0;
+    private static final int NEGATIVE_MULTIPLIER = -1;
 
     public ObligationServiceImpl(UserService userService) {
         this.userService = userService;
@@ -27,14 +29,17 @@ public class ObligationServiceImpl implements ObligationService {
     }
 
     @Override
-    public Collection<Obligation> getObligationsForUser(String username) throws UserNotFoundException {
+    public Collection<Obligation> getObligationsForUser(String username)
+            throws UserNotFoundException {
         if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("Invalid argument! Username is null or blank!");
+            throw new IllegalArgumentException("Invalid argument! "
+                    + "Username is null or blank!");
         }
 
         Optional<User> user = userService.findUserByUsername(username);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User with username " + username + " was not found!");
+            throw new UserNotFoundException("User with username " + username
+                    + " was not found!");
         }
 
         return obligations
@@ -45,14 +50,18 @@ public class ObligationServiceImpl implements ObligationService {
     }
 
     @Override
-    public Optional<Obligation> findObligationByUsers(String firstUsername, String secondUsername) throws UserNotFoundException {
+    public Optional<Obligation> findObligationByUsers(String firstUsername,
+                                                      String secondUsername)
+            throws UserNotFoundException {
         Optional<User> firstUser = userService.findUserByUsername(firstUsername);
         if (firstUser.isEmpty()) {
-            throw new UserNotFoundException("User with username " + firstUsername + " was not found!");
+            throw new UserNotFoundException("User with username " + firstUsername
+                    + " was not found!");
         }
         Optional<User> secondUser = userService.findUserByUsername(secondUsername);
         if (secondUser.isEmpty()) {
-            throw new UserNotFoundException("User with username " + secondUsername + " was not found!");
+            throw new UserNotFoundException("User with username " + secondUsername
+                    + " was not found!");
         }
 
         return findObligationByUsers(firstUser.get(), secondUser.get());
@@ -75,7 +84,8 @@ public class ObligationServiceImpl implements ObligationService {
             throw new IllegalArgumentException("Invalid arguments! User is null!");
         }
 
-        Obligation obligation = new Obligation(payer, receiver, -1 * amount);
+        Obligation obligation = new Obligation(payer, receiver,
+                NEGATIVE_MULTIPLIER * amount);
         obligations.add(obligation);
         obligationCsvProcessor.writeObligationToCsvFile(obligation);
     }
@@ -86,11 +96,13 @@ public class ObligationServiceImpl implements ObligationService {
                                  double amountPaid) throws UserNotFoundException {
         Optional<User> payer = userService.findUserByUsername(payerUsername);
         if (payer.isEmpty()) {
-            throw new UserNotFoundException("User with username " + payerUsername + " was not found!");
+            throw new UserNotFoundException("User with username " + payerUsername
+                    + " was not found!");
         }
         Optional<User> receiver = userService.findUserByUsername(receiverUsername);
         if (receiver.isEmpty()) {
-            throw new UserNotFoundException("User with username " + receiverUsername + " was not found!");
+            throw new UserNotFoundException("User with username " + receiverUsername
+                    + " was not found!");
         }
 
         updateObligation(payer.get(), receiver.get(), amountPaid);
@@ -122,8 +134,8 @@ public class ObligationServiceImpl implements ObligationService {
         }
     }
 
-    public String getObligationStatusWithUserForLoggedInUser(String loggedUsername, String otherUsername)
-            throws UserNotFoundException {
+    public String getObligationStatusWithUserForLoggedInUser(String loggedUsername,
+            String otherUsername) throws UserNotFoundException {
         Optional<User> otherUser = userService.findUserByUsername(otherUsername);
 
         Optional<Obligation> obligation = findObligationByUsers(
@@ -132,9 +144,11 @@ public class ObligationServiceImpl implements ObligationService {
         String obligationStatus = "";
         if (obligation.isPresent()) {
             double balance = obligation.get().getBalance();
-            boolean youOwe = (balance > 0 && obligation.get().getSecondUser().equals(otherUser.get()))
-                    || (balance < 0 && obligation.get().getFirstUser().equals(otherUser.get()));
-            if (balance != 0) {
+            boolean youOwe = (balance > BALANCE_ZERO && obligation.get().getSecondUser()
+                    .equals(otherUser.get()))
+                    || (balance < BALANCE_ZERO && obligation.get().getFirstUser()
+                    .equals(otherUser.get()));
+            if (balance != BALANCE_ZERO) {
                 obligationStatus = String.format("%s %s",
                         youOwe ? " : You owe" : " : Owes you",
                         FormatterProvider.getDecimalFormat().format(Math.abs(balance)));
