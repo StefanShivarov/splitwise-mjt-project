@@ -4,6 +4,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.exception.ObligationNotFoundExcepti
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Obligation;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.util.FormatterProvider;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,10 +13,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -25,8 +23,6 @@ import java.util.stream.IntStream;
 
 public class ObligationCsvProcessor {
 
-    private static final DecimalFormat decimalFormat = new DecimalFormat(
-            "#.00", DecimalFormatSymbols.getInstance(Locale.US));
     private static final String OBLIGATIONS_CSV_FILE_PATH = "resources/obligations.csv";
     private final UserService userService;
 
@@ -122,7 +118,8 @@ public class ObligationCsvProcessor {
         return String.format("%s,%s,%s",
                 obligation.getFirstUser().getUsername(),
                 obligation.getSecondUser().getUsername(),
-                decimalFormat.format(obligation.getBalance()));
+                FormatterProvider.getDecimalFormat()
+                        .format(obligation.getBalance()));
     }
 
 }

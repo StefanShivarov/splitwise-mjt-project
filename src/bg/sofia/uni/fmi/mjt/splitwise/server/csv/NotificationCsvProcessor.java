@@ -1,7 +1,7 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.csv;
 
-import bg.sofia.uni.fmi.mjt.splitwise.server.exception.UserNotFoundException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.Notification;
+import bg.sofia.uni.fmi.mjt.splitwise.server.util.FormatterProvider;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,24 +10,15 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class NotificationCsvProcessor {
 
     private static final String NOTIFICATIONS_CSV_FILE_PATH = "resources/notifications.csv";
-    private static final DecimalFormat decimalFormat = new DecimalFormat(
-            "#.00", DecimalFormatSymbols.getInstance(Locale.US));
-
-    private static final DateTimeFormatter dateTimeFormatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public NotificationCsvProcessor() {
 
@@ -89,7 +80,7 @@ public class NotificationCsvProcessor {
                 "," +
                 notification.getRecipientUsername() +
                 "," +
-                notification.getTimestamp().format(dateTimeFormatter));
+                notification.getTimestamp().format(FormatterProvider.getDateTimeFormatter()));
     }
 
     private Notification parseFromCsvRow(String[] stringTokens) {
@@ -100,7 +91,8 @@ public class NotificationCsvProcessor {
             return null;
         }
 
-        LocalDateTime timestamp = LocalDateTime.parse(stringTokens[2], dateTimeFormatter);
+        LocalDateTime timestamp = LocalDateTime.parse(stringTokens[2],
+                FormatterProvider.getDateTimeFormatter());
         boolean isSeen = Boolean.parseBoolean(stringTokens[3]);
 
         return new Notification(message, username, timestamp, isSeen);
@@ -110,7 +102,8 @@ public class NotificationCsvProcessor {
         return String.format("%s,%s,%s,%s",
                 notification.getMessage(),
                 notification.getRecipientUsername(),
-                notification.getTimestamp().format(dateTimeFormatter),
+                notification.getTimestamp()
+                        .format(FormatterProvider.getDateTimeFormatter()),
                 notification.isSeen());
     }
 

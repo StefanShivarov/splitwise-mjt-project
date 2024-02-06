@@ -1,7 +1,6 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.model;
 
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
