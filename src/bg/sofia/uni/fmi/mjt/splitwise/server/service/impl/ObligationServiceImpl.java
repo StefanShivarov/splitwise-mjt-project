@@ -7,6 +7,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.model.Obligation;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ObligationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.util.FormatterProvider;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -119,6 +120,28 @@ public class ObligationServiceImpl implements ObligationService {
                 throw new RuntimeException(e.getMessage(), e);
             }
         }
+    }
+
+    public String getObligationStatusWithUserForLoggedInUser(String loggedUsername, String otherUsername)
+            throws UserNotFoundException {
+        Optional<User> otherUser = userService.findUserByUsername(otherUsername);
+
+        Optional<Obligation> obligation = findObligationByUsers(
+                loggedUsername, otherUsername);
+
+        String obligationStatus = "";
+        if (obligation.isPresent()) {
+            double balance = obligation.get().getBalance();
+            boolean youOwe = (balance > 0 && obligation.get().getSecondUser().equals(otherUser.get()))
+                    || (balance < 0 && obligation.get().getFirstUser().equals(otherUser.get()));
+            if (balance != 0) {
+                obligationStatus = String.format("%s %s",
+                        youOwe ? " : You owe" : " : Owes you",
+                        FormatterProvider.getDecimalFormat().format(Math.abs(balance)));
+            }
+        }
+
+        return String.format("%s%s", otherUser.get(), obligationStatus);
     }
 
 }

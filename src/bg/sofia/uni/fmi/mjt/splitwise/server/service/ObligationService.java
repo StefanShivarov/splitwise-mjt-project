@@ -23,4 +23,7 @@ public interface ObligationService {
 
     void updateObligation(User payer, User receiver, double paidAmount);
 
+    String getObligationStatusWithUserForLoggedInUser(String loggedUsername, String otherUsername)
+            throws UserNotFoundException;
+
 }

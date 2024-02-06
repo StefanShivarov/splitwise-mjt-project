@@ -8,6 +8,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NotificationServiceImpl implements NotificationService {
 
@@ -48,6 +49,19 @@ public class NotificationServiceImpl implements NotificationService {
                 .filter(notification -> !notification.isSeen())
                 .sorted((n1, n2) -> n2.getTimestamp().compareTo(n1.getTimestamp()))
                 .toList();
+    }
+
+    @Override
+    public String getNotificationsOutput(Collection<Notification> notifications) {
+        if (notifications.isEmpty()) {
+            return "No notifications to show.";
+        }
+
+        return "*** Notifications ***" + System.lineSeparator() +
+                notifications
+                        .stream()
+                        .map(Notification::toString)
+                        .collect(Collectors.joining(System.lineSeparator()));
     }
 
     @Override

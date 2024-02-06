@@ -11,6 +11,8 @@ public interface NotificationService {
 
     Collection<Notification> getUnseenNotificationsForUser(String username) throws UserNotFoundException;
 
+    String getNotificationsOutput(Collection<Notification> notifications);
+
     void markNotificationsAsSeen(Collection<Notification> notifications);
 
     void addNotification(String message, String recipientUsername) throws UserNotFoundException;

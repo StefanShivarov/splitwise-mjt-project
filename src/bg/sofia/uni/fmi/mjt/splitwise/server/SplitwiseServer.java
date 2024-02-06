@@ -1,5 +1,6 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.factory.CommandFactory;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
@@ -43,13 +44,14 @@ public class SplitwiseServer {
                 clientSocket = serverSocket.accept();
                 System.out.println("New client connected.");
                 executor.execute(new ClientHandler(clientSocket,
-                        new AuthenticationManager(userService),
-                        userService,
-                        friendshipService,
-                        groupService,
-                        expenseService,
-                        obligationService,
-                        notificationService));
+                        new CommandFactory(
+                                new AuthenticationManager(userService),
+                                userService,
+                                friendshipService,
+                                groupService,
+                                expenseService,
+                                obligationService,
+                                notificationService)));
             }
         } catch (IOException e) {
             throw new RuntimeException("Error occurred with the server socket!", e);
