@@ -46,12 +46,13 @@ public class CreateGroupCommand implements Command {
                 if (!username.equals(authManager.getAuthenticatedUser().getUsername())) {
                     notificationService.addNotification(
                             authManager.getAuthenticatedUser().getFullName()
-                                    + "added you to group" + groupName + ".",
+                                    + "added you to group " + groupName + ".",
                             username);
                 }
             }
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
+            return;
         }
 
         groupService.addGroup(groupName, usernames);

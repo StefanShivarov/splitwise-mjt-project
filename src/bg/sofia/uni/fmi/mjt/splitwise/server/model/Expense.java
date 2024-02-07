@@ -1,5 +1,7 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.model;
 
+import bg.sofia.uni.fmi.mjt.splitwise.server.util.FormatterProvider;
+
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -13,8 +15,8 @@ public record Expense(User payer, String description, double amount, Set<User> p
 
     @Override
     public String toString() {
-        return String.format("%.2f for %s; Reason: [%s]",
-                amount,
+        return String.format("%s for %s; Reason: [%s]",
+                FormatterProvider.getDecimalFormat().format(amount),
                 participants
                         .stream()
                         .map(User::getUsername)
