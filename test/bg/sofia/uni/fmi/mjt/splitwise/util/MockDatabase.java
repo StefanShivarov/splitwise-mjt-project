@@ -21,5 +21,3 @@ public class MockDatabase {
                     stefan shivarov paid 24.00 (8.00 each) for group diskoteka [alcohol].,valio,2024-02-06 22:56:41,true""";
 
 }
-// I am going to need to refactor a lot of my code to be able to test most of the classes ,
-// but unfortunately I don't have enough time left :(
