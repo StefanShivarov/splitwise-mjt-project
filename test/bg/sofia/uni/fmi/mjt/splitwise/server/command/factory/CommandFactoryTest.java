@@ -14,19 +14,18 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithGroupCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithFriendCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.GroupService;
+import bg.sofia.uni.fmi.mjt.splitwise.server.service.NotificationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ObligationService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
-import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.ExpenseServiceImpl;
-import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.FriendshipServiceImpl;
-import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.GroupServiceImpl;
-import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.NotificationServiceImpl;
-import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.ObligationServiceImpl;
-import bg.sofia.uni.fmi.mjt.splitwise.server.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 public class CommandFactoryTest {
 
@@ -34,17 +33,21 @@ public class CommandFactoryTest {
 
     @BeforeAll
     static void setUp() {
-        UserService userService = new UserServiceImpl();
-        ObligationService obligationService = new ObligationServiceImpl(userService);
-        userService = new UserServiceImpl();
+        UserService userServiceMock = mock();
+        AuthenticationManager authenticationManagerMock = mock();
+        ObligationService obligationServiceMock = mock();
+        FriendshipService friendshipServiceMock = mock();
+        GroupService groupServiceMock = mock();
+        ExpenseService expenseServiceMock = mock();
+        NotificationService notificationServiceMock = mock();
         commandFactory = new CommandFactory(
-                new AuthenticationManager(userService),
-                userService,
-                new FriendshipServiceImpl(userService),
-                new GroupServiceImpl(userService),
-                new ExpenseServiceImpl(userService, obligationService),
-                obligationService,
-                new NotificationServiceImpl(userService));
+                authenticationManagerMock,
+                userServiceMock,
+                friendshipServiceMock,
+                groupServiceMock,
+                expenseServiceMock,
+                obligationServiceMock,
+                notificationServiceMock);
     }
 
     @Test
