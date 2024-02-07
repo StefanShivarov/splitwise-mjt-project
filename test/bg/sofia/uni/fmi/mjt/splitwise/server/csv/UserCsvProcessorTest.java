@@ -37,9 +37,11 @@ public class UserCsvProcessorTest {
 
     @Test
     void testLoadUsersFromCsvFile() {
-        System.out.println(MockDatabase.USERS_CSV.lines().collect(Collectors.joining("\n")));
         Set<String> loadedUsers = userCsvProcessor.loadUsersFromCsvFile()
-                .stream().map(User::toString).collect(Collectors.toSet());
+                .stream()
+                .map(User::toString)
+                .collect(Collectors.toSet());
+
         assertEquals(3, loadedUsers.size(),
                 "loadUsersFromCsvFile should load correct data!");
         assertTrue(loadedUsers.contains("Stefan Shivarov (stefanaki95)"),

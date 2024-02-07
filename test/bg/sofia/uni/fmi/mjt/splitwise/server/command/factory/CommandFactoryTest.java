@@ -7,9 +7,11 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.HelpCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.LoginCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.LogoutCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.RegisterCommand;
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowAllNotificationsCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowExpensesCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowFriendsCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowGroupsCommand;
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowNewNotificationsCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithGroupCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithFriendCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
@@ -88,6 +90,12 @@ public class CommandFactoryTest {
         assertInstanceOf(ShowExpensesCommand.class,
                 commandFactory.createCommand("my-expenses"),
                 "my-expenses should return ShowExpensesCommand!");
+        assertInstanceOf(ShowNewNotificationsCommand.class,
+                commandFactory.createCommand("notifications"),
+                "notifications should return ShowNewNotificationsCommand!");
+        assertInstanceOf(ShowAllNotificationsCommand.class,
+                commandFactory.createCommand("all-notifications"),
+                "all-notifications should return ShowAllNotificationsCommand!");
     }
 
     @Test
