@@ -43,6 +43,10 @@ public class RegisterCommand implements Command {
             default -> throw new InvalidCommandInputException(
                     "Invalid user information! User can't be created!");
         }
+
+        out.println("Successfully created user " + inputTokens[USERNAME_INDEX] + "!"
+                + System.lineSeparator()
+                + "Please register or login to get started.");
     }
 
     private void validate() throws AlreadyAuthenticatedException {

@@ -19,9 +19,10 @@ public class GroupServiceImpl implements GroupService {
     private final GroupCsvProcessor groupCsvProcessor;
     private final Set<Group> groups;
 
-    public GroupServiceImpl(UserService userService) {
+    public GroupServiceImpl(GroupCsvProcessor groupCsvProcessor,
+                            UserService userService) {
         this.userService = userService;
-        this.groupCsvProcessor = new GroupCsvProcessor(userService);
+        this.groupCsvProcessor = groupCsvProcessor;
         this.groups = groupCsvProcessor.loadGroupsFromCsvFile();
     }
 
@@ -29,7 +30,8 @@ public class GroupServiceImpl implements GroupService {
     public Collection<Group> getGroupsForUser(String username) throws UserNotFoundException {
         Optional<User> user = userService.findUserByUsername(username);
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User with username + " + username + " was not found!");
+            throw new UserNotFoundException("User with username + "
+                    + username + " was not found!");
         }
 
         return groups
@@ -44,7 +46,8 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public void addGroup(String name, Set<String> usernames) {
         if (name == null || name.isBlank() || usernames == null) {
-            throw new IllegalArgumentException("Invalid arguments! Can't add group to database!");
+            throw new IllegalArgumentException("Invalid arguments!"
+                    + " Can't add group to database!");
         }
 
         Set<User> users = usernames

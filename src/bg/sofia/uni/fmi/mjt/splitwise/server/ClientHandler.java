@@ -44,6 +44,7 @@ public class ClientHandler implements Runnable {
 
             String input;
             while ((input = in.readLine()) != null) {
+                System.out.println(input);
                 executeCommand(input, out);
             }
         } catch (IOException e) {

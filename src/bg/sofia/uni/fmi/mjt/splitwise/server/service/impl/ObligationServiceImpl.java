@@ -22,9 +22,10 @@ public class ObligationServiceImpl implements ObligationService {
     private static final int BALANCE_ZERO = 0;
     private static final int NEGATIVE_MULTIPLIER = -1;
 
-    public ObligationServiceImpl(UserService userService) {
+    public ObligationServiceImpl(ObligationCsvProcessor obligationCsvProcessor,
+                                 UserService userService) {
         this.userService = userService;
-        this.obligationCsvProcessor = new ObligationCsvProcessor(userService);
+        this.obligationCsvProcessor = obligationCsvProcessor;
         this.obligations = obligationCsvProcessor.loadObligationsFromCsvFile();
     }
 

@@ -11,6 +11,8 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.RegisterCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowExpensesCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowFriendsCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowGroupsCommand;
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowNewNotificationsCommand;
+import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.ShowAllNotificationsCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithGroupCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.impl.SplitWithFriendCommand;
 import bg.sofia.uni.fmi.mjt.splitwise.server.exception.InvalidCommandInputException;
@@ -68,6 +70,8 @@ public class CommandFactory {
             case "approve-payment" -> new ApprovePaymentCommand(authManager, obligationService,
                     notificationService);
             case "my-expenses" -> new ShowExpensesCommand(authManager, expenseService);
+            case "notifications" -> new ShowNewNotificationsCommand(authManager, notificationService);
+            case "all-notifications" -> new ShowAllNotificationsCommand(authManager, notificationService);
             default -> throw new InvalidCommandInputException(
                     "Invalid command! Cannot recognize command " + command + "!");
         };

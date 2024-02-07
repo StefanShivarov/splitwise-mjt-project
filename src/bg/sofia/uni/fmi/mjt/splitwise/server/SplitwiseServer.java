@@ -1,6 +1,7 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.command.factory.CommandFactory;
+import bg.sofia.uni.fmi.mjt.splitwise.server.csv.CsvProcessorInitializer;
 import bg.sofia.uni.fmi.mjt.splitwise.server.security.AuthenticationManager;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.ExpenseService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.FriendshipService;
@@ -28,26 +29,38 @@ public class SplitwiseServer {
 
     public static void main(String[] args) {
         ExecutorService executor = Executors.newFixedThreadPool(EXECUTORS_AMOUNT);
-        Thread.currentThread().setName("Splitwise Server Thread");
 
-        UserService userService = new UserServiceImpl();
-        FriendshipService friendshipService = new FriendshipServiceImpl(userService);
-        GroupService groupService = new GroupServiceImpl(userService);
-        ObligationService obligationService = new ObligationServiceImpl(userService);
-        ExpenseService expenseService = new ExpenseServiceImpl(userService, obligationService);
-        NotificationService notificationService = new NotificationServiceImpl(userService);
+        UserService userService = new UserServiceImpl(
+                CsvProcessorInitializer.newUserCsvProcessor());
+        FriendshipService friendshipService = new FriendshipServiceImpl(
+                CsvProcessorInitializer.newFriendshipCsvProcessor(userService), userService);
+        GroupService groupService = new GroupServiceImpl(
+                CsvProcessorInitializer.newGroupCsvProcessor(userService), userService);
+        ObligationService obligationService = new ObligationServiceImpl(
+                CsvProcessorInitializer.newObligationCsvProcessor(userService), userService);
+        ExpenseService expenseService = new ExpenseServiceImpl(
+                CsvProcessorInitializer.newExpenseCsvProcessor(userService),
+                userService, obligationService);
+        NotificationService notificationService = new NotificationServiceImpl(
+                CsvProcessorInitializer.newNotificationCsvProcessor(), userService);
 
+        runServer(executor, userService, friendshipService, groupService,
+                expenseService, obligationService, notificationService);
+    }
+
+    private static void runServer(ExecutorService executor, UserService userService,
+                           FriendshipService friendshipService, GroupService groupService,
+                           ExpenseService expenseService, ObligationService obligationService,
+                           NotificationService notificationService) {
         try (ServerSocket serverSocket = new ServerSocket(SERVER_PORT)) {
             Socket clientSocket;
             while (true) {
                 clientSocket = serverSocket.accept();
-                System.out.println("New client connected.");
                 executor.execute(new ClientHandler(clientSocket,
                         new CommandFactory(
                                 new AuthenticationManager(userService), userService,
-                                friendshipService, groupService,
-                                expenseService, obligationService,
-                                notificationService)));
+                                friendshipService, groupService, expenseService,
+                                obligationService, notificationService)));
             }
         } catch (IOException e) {
             throw new RuntimeException("Error occurred with the server socket!", e);
@@ -55,4 +68,5 @@ public class SplitwiseServer {
             executor.shutdown();
         }
     }
+
 }

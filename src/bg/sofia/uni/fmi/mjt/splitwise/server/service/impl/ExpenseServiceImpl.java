@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ExpenseServiceImpl implements ExpenseService {
 
@@ -21,11 +22,12 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final ExpenseCsvProcessor expenseCsvProcessor;
     private final List<Expense> expenses;
 
-    public ExpenseServiceImpl(UserService userService,
+    public ExpenseServiceImpl(ExpenseCsvProcessor expenseCsvProcessor,
+                              UserService userService,
                               ObligationService obligationService) {
         this.userService = userService;
         this.obligationService = obligationService;
-        this.expenseCsvProcessor = new ExpenseCsvProcessor(userService);
+        this.expenseCsvProcessor = expenseCsvProcessor;
         this.expenses = expenseCsvProcessor.loadExpensesFromCsvFile();
     }
 
@@ -41,7 +43,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenses
                 .stream()
                 .filter(expense -> expense.payer().getUsername().equals(username))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -71,6 +73,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
 
         Expense expense = new Expense(payer.get(), description, amount, participants);
+        expenses.add(expense);
         expenseCsvProcessor.writeExpenseToCsvFile(expense);
         double amountPerUser = amount / (participants.size() + 1);
         participants.forEach(participant ->

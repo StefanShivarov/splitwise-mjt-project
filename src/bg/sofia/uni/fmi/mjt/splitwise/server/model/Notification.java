@@ -2,6 +2,7 @@ package bg.sofia.uni.fmi.mjt.splitwise.server.model;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class Notification {
 
@@ -60,4 +61,21 @@ public class Notification {
                 getMessage(),
                 getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Notification that = (Notification) o;
+        return seen == that.seen
+                && Objects.equals(message, that.message)
+                && Objects.equals(recipientUsername, that.recipientUsername)
+                && Objects.equals(timestamp, that.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(message, recipientUsername, timestamp, seen);
+    }
+
 }

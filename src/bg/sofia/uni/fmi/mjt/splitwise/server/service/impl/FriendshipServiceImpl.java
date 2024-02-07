@@ -20,9 +20,10 @@ public class FriendshipServiceImpl implements FriendshipService {
     private final UserService userService;
     private final FriendshipCsvProcessor friendshipCsvProcessor;
 
-    public FriendshipServiceImpl(UserService userService) {
+    public FriendshipServiceImpl(FriendshipCsvProcessor friendshipCsvProcessor,
+                                 UserService userService) {
+        this.friendshipCsvProcessor = friendshipCsvProcessor;
         this.userService = userService;
-        this.friendshipCsvProcessor = new FriendshipCsvProcessor(userService);
         this.friendships = friendshipCsvProcessor.loadFriendshipsFromCsvFile();
     }
 
@@ -65,6 +66,7 @@ public class FriendshipServiceImpl implements FriendshipService {
             throw new UserNotFoundException("User with username "
                     + firstUsername + " was not found!");
         }
+
         if (secondUser.isEmpty()) {
             throw new UserNotFoundException("User with username "
                     + firstUsername + " was not found!");

@@ -1,5 +1,7 @@
 package bg.sofia.uni.fmi.mjt.splitwise.server.model;
 
+import java.util.Objects;
+
 public class User {
 
     private String firstName;
@@ -59,6 +61,22 @@ public class User {
         return String.format("%s %s",
                 firstName,
                 lastName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(firstName, user.firstName)
+                && Objects.equals(lastName, user.lastName)
+                && Objects.equals(username, user.username)
+                && Objects.equals(hashedPassword, user.hashedPassword);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName, username, hashedPassword);
     }
 
 }

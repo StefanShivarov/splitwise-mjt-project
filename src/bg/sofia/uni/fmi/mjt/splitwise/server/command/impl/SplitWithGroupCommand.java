@@ -62,7 +62,7 @@ public class SplitWithGroupCommand implements Command {
             sendNotifications(groupName, description, amount, usernames);
 
             out.println("You split " + FormatterProvider.getDecimalFormat().format(amount)
-                    + " with group" + groupName + ".");
+                    + " with group " + groupName + ".");
         } catch (UserNotFoundException e) {
             out.println(e.getMessage());
         }

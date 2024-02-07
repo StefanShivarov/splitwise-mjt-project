@@ -7,7 +7,6 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.util.FormatterProvider;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -24,28 +23,24 @@ import java.util.stream.IntStream;
 public class ObligationCsvProcessor {
 
     private static final String OBLIGATIONS_CSV_FILE_PATH = "resources/obligations.csv";
-    private final UserService userService;
     private static final int FIRST_USERNAME_INDEX = 0;
     private static final int SECOND_USERNAME_INDEX = 1;
     private static final int BALANCE_INDEX = 2;
+    private final UserService userService;
+    private final CsvReader csvReader;
 
-    public ObligationCsvProcessor(UserService userService) {
+    public ObligationCsvProcessor(CsvReader csvReader,
+                                  UserService userService) {
         this.userService = userService;
+        this.csvReader = csvReader;
     }
 
     public Set<Obligation> loadObligationsFromCsvFile() {
-        try (CsvReader csvReader = new CsvReader(
-                new InputStreamReader(new FileInputStream(OBLIGATIONS_CSV_FILE_PATH)))) {
-
-            return csvReader.readAllLines()
-                    .stream()
-                    .map(this::parseFromCsvRow)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return csvReader.readAllLines()
+                .stream()
+                .map(this::parseFromCsvRow)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     public void writeObligationToCsvFile(Obligation obligation) {

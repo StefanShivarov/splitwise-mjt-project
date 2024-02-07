@@ -5,10 +5,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 import bg.sofia.uni.fmi.mjt.splitwise.server.util.FormatterProvider;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -22,30 +19,26 @@ import java.util.stream.Collectors;
 public class ExpenseCsvProcessor {
 
     private static final String EXPENSES_CSV_FILE_PATH = "resources/expenses.csv";
-    private final UserService userService;
     private static final int MIN_TOKENS_AMOUNT = 4;
     private static final int SKIP_TO_USERNAMES = 3;
     private static final int AMOUNT_INDEX = 2;
     private static final int DESC_INDEX = 1;
     private static final int USERNAME_INDEX = 0;
+    private final UserService userService;
+    private final CsvReader csvReader;
 
-    public ExpenseCsvProcessor(UserService userService) {
+    public ExpenseCsvProcessor(CsvReader csvReader,
+                               UserService userService) {
+        this.csvReader = csvReader;
         this.userService = userService;
     }
 
     public List<Expense> loadExpensesFromCsvFile() {
-        try (CsvReader csvReader = new CsvReader(
-                new InputStreamReader(new FileInputStream(EXPENSES_CSV_FILE_PATH)))) {
-
-            return csvReader.readAllLines()
-                    .stream()
-                    .map(this::parseFromCsvRow)
-                    .filter(Objects::nonNull)
-                    .toList();
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return csvReader.readAllLines()
+                .stream()
+                .map(this::parseFromCsvRow)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public void writeExpenseToCsvFile(Expense expense) {

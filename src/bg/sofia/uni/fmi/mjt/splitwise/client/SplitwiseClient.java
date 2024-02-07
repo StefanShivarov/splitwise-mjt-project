@@ -11,7 +11,6 @@ public class SplitwiseClient {
 
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 7777;
-    private static final String DISCONNECT_COMMAND = "disconnect";
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(SERVER_HOST, SERVER_PORT);
@@ -25,7 +24,7 @@ public class SplitwiseClient {
                 printServerResponse(in);
                 String input = scanner.nextLine();
 
-                if (input.equals(DISCONNECT_COMMAND)) {
+                if (input.equals("disconnect")) {
                     System.out.println("Disconnected from server.");
                     break;
                 }

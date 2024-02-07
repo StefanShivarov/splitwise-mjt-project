@@ -13,8 +13,8 @@ public class UserServiceImpl implements UserService {
     private final Set<User> users;
     private final UserCsvProcessor userCsvProcessor;
 
-    public UserServiceImpl() {
-        this.userCsvProcessor = new UserCsvProcessor();
+    public UserServiceImpl(UserCsvProcessor userCsvProcessor) {
+        this.userCsvProcessor = userCsvProcessor;
         this.users = userCsvProcessor.loadUsersFromCsvFile();
     }
 

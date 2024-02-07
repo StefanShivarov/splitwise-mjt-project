@@ -4,10 +4,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.model.Friendship;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -20,24 +17,20 @@ public class FriendshipCsvProcessor {
 
     private static final String FRIENDSHIPS_CSV_FILE_PATH = "resources/friendships.csv";
     private final UserService userService;
+    private final CsvReader csvReader;
 
-    public FriendshipCsvProcessor(UserService userService) {
+    public FriendshipCsvProcessor(CsvReader csvReader,
+                                  UserService userService) {
+        this.csvReader = csvReader;
         this.userService = userService;
     }
 
     public Set<Friendship> loadFriendshipsFromCsvFile() {
-        try (CsvReader csvReader = new CsvReader(
-                new InputStreamReader(new FileInputStream(FRIENDSHIPS_CSV_FILE_PATH)))) {
-
-            return csvReader.readAllLines()
-                    .stream()
-                    .map(this::parseFromCsvRow)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return csvReader.readAllLines()
+                .stream()
+                .map(this::parseFromCsvRow)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     public void writeFriendshipToCsvFile(Friendship friendship) {

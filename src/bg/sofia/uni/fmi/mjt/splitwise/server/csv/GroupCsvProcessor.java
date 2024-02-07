@@ -4,10 +4,7 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.model.Group;
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 import bg.sofia.uni.fmi.mjt.splitwise.server.service.UserService;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -20,27 +17,23 @@ import java.util.stream.Collectors;
 public class GroupCsvProcessor {
 
     private static final String GROUPS_CSV_FILE_PATH = "resources/groups.csv";
-    private final UserService userService;
     private static final int GROUP_NAME_INDEX = 0;
     private static final int SKIP_TO_USERNAMES = 1;
+    private final UserService userService;
+    private final CsvReader csvReader;
 
-    public GroupCsvProcessor(UserService userService) {
+    public GroupCsvProcessor(CsvReader csvReader,
+                             UserService userService) {
+        this.csvReader = csvReader;
         this.userService = userService;
     }
 
     public Set<Group> loadGroupsFromCsvFile() {
-        try (CsvReader csvReader = new CsvReader(
-                new InputStreamReader(new FileInputStream(GROUPS_CSV_FILE_PATH)))) {
-
-            return csvReader.readAllLines()
-                    .stream()
-                    .map(this::parseFromCsvRow)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return csvReader.readAllLines()
+                .stream()
+                .map(this::parseFromCsvRow)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     public void writeGroupToCsvFile(Group group) {

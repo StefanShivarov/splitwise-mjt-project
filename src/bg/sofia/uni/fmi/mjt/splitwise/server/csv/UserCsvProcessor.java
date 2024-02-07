@@ -2,10 +2,7 @@ package bg.sofia.uni.fmi.mjt.splitwise.server.csv;
 
 import bg.sofia.uni.fmi.mjt.splitwise.server.model.User;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -15,23 +12,21 @@ import java.util.stream.Collectors;
 public class UserCsvProcessor {
 
     private static final String USERS_CSV_FILE_PATH = "resources/users.csv";
-    private static final int START_INDEX = 0;
+    private static final int USERNAME_INDEX = 0;
+    private static final int PASSWORD_INDEX = 1;
     private static final int FIRST_NAME_INDEX = 2;
     private static final int LAST_NAME_INDEX = 3;
+    private final CsvReader csvReader;
+
+    public UserCsvProcessor(CsvReader csvReader) {
+        this.csvReader = csvReader;
+    }
 
     public Set<User> loadUsersFromCsvFile() {
-        try (CsvReader csvReader = new CsvReader(
-                new InputStreamReader(new FileInputStream(USERS_CSV_FILE_PATH)))) {
-
-            return csvReader.readAllLines()
-                    .stream()
-                    .map(this::parseFromCsvRow)
-                    .collect(Collectors.toSet());
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(
-                    "Error! Could not find the specified file." + USERS_CSV_FILE_PATH, e);
-        }
+        return csvReader.readAllLines()
+                .stream()
+                .map(this::parseFromCsvRow)
+                .collect(Collectors.toSet());
     }
 
     public void writeUserToCsvFile(User user) {
@@ -45,14 +40,13 @@ public class UserCsvProcessor {
     }
 
     private User parseFromCsvRow(String[] rowTokens) {
-        int index = START_INDEX;
-        User user = new User(rowTokens[index++], rowTokens[index++]);
+        User user = new User(rowTokens[USERNAME_INDEX], rowTokens[PASSWORD_INDEX]);
 
         if (rowTokens.length > FIRST_NAME_INDEX) {
-            user.setFirstName(rowTokens[index++]);
+            user.setFirstName(rowTokens[FIRST_NAME_INDEX]);
         }
         if (rowTokens.length > LAST_NAME_INDEX) {
-            user.setLastName(rowTokens[index]);
+            user.setLastName(rowTokens[LAST_NAME_INDEX]);
         }
 
         return user;

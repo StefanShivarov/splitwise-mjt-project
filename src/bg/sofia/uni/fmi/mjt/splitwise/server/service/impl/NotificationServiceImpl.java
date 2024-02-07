@@ -16,9 +16,10 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationCsvProcessor notificationCsvProcessor;
     private final List<Notification> notifications;
 
-    public NotificationServiceImpl(UserService userService) {
+    public NotificationServiceImpl(NotificationCsvProcessor notificationCsvProcessor,
+                                   UserService userService) {
         this.userService = userService;
-        this.notificationCsvProcessor = new NotificationCsvProcessor();
+        this.notificationCsvProcessor = notificationCsvProcessor;
         this.notifications = notificationCsvProcessor.loadNotificationsFromCsvFile();
     }
 

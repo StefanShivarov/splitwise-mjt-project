@@ -4,7 +4,6 @@ import bg.sofia.uni.fmi.mjt.splitwise.server.model.Notification;
 import bg.sofia.uni.fmi.mjt.splitwise.server.util.FormatterProvider;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -23,24 +22,18 @@ public class NotificationCsvProcessor {
     private static final int USERNAME_INDEX = 1;
     private static final int TIMESTAMP_INDEX = 2;
     private static final int SEEN_INDEX = 3;
+    private final CsvReader csvReader;
 
-    public NotificationCsvProcessor() {
-
+    public NotificationCsvProcessor(CsvReader csvReader) {
+        this.csvReader = csvReader;
     }
 
     public List<Notification> loadNotificationsFromCsvFile() {
-        try (CsvReader csvReader = new CsvReader(
-                new InputStreamReader(new FileInputStream(NOTIFICATIONS_CSV_FILE_PATH)))) {
-
-            return csvReader.readAllLines()
-                    .stream()
-                    .map(this::parseFromCsvRow)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        return csvReader.readAllLines()
+                .stream()
+                .map(this::parseFromCsvRow)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public void writeNotificationToCsvFile(Notification notification) {
